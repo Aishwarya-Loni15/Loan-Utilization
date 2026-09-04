@@ -1,0 +1,12 @@
+{
+  "appTitle": "Laon Utilization",
+  "appSubtitle": "AI-Powered Loan Utilization Tracking System",
+  "signIn": "Sign In",
+  "register": "Register",
+  "sanctionedLoan": "Sanctioned Loan Disbursement",
+  "submitEvidence": "Submit Loan Utilization Evidence",
+  "aiScore": "AI Verification Score",
+  "riskLow": "Low Risk (Verified)",
+  "riskMedium": "Medium Risk (Review Recommended)",
+  "riskHigh": "High Risk (Suspicious)"
+}

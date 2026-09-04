@@ -1,0 +1,261 @@
+{
+  "indexes": [
+    // ───────────────────────────────────────────────
+    // LOANS
+    // ───────────────────────────────────────────────
+
+    // Beneficiary: own loans ordered by date
+    {
+      "collectionGroup": "loans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "beneficiaryId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt",     "order": "DESCENDING" }
+      ]
+    },
+    // Bank manager: loans by bank + status
+    {
+      "collectionGroup": "loans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bankId",    "order": "ASCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    // State officer: loans by district + status
+    {
+      "collectionGroup": "loans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "districtId", "order": "ASCENDING" },
+        { "fieldPath": "status",     "order": "ASCENDING" },
+        { "fieldPath": "createdAt",  "order": "DESCENDING" }
+      ]
+    },
+    // Admin: all loans by status + date
+    {
+      "collectionGroup": "loans",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+
+    // ───────────────────────────────────────────────
+    // UTILIZATION SUBMISSIONS
+    // ───────────────────────────────────────────────
+
+    // Beneficiary: own submissions ordered by date
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "beneficiaryId", "order": "ASCENDING" },
+        { "fieldPath": "createdAt",     "order": "DESCENDING" }
+      ]
+    },
+    // Beneficiary + loan: submissions for a specific loan
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "beneficiaryId", "order": "ASCENDING" },
+        { "fieldPath": "loanId",        "order": "ASCENDING" },
+        { "fieldPath": "createdAt",     "order": "DESCENDING" }
+      ]
+    },
+    // Officer: pending reviews in their district
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "districtId", "order": "ASCENDING" },
+        { "fieldPath": "status",     "order": "ASCENDING" },
+        { "fieldPath": "createdAt",  "order": "DESCENDING" }
+      ]
+    },
+    // Officer: high-risk submissions in district
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "districtId", "order": "ASCENDING" },
+        { "fieldPath": "riskLevel",  "order": "ASCENDING" },
+        { "fieldPath": "createdAt",  "order": "DESCENDING" }
+      ]
+    },
+    // Bank manager: submissions by bank + status
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bankId",    "order": "ASCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    // Admin: all submissions by status + date
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    // Admin: high-risk submissions across system
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "riskLevel", "order": "ASCENDING" },
+        { "fieldPath": "aiScore",   "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    // Suspicious/duplicate detection by loan + beneficiary
+    {
+      "collectionGroup": "utilization_submissions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "loanId",        "order": "ASCENDING" },
+        { "fieldPath": "beneficiaryId", "order": "ASCENDING" },
+        { "fieldPath": "capturedAt",    "order": "DESCENDING" }
+      ]
+    },
+
+    // ───────────────────────────────────────────────
+    // AI ANALYSES
+    // ───────────────────────────────────────────────
+
+    // Lookup AI result by submission
+    {
+      "collectionGroup": "ai_analyses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "submissionId", "order": "ASCENDING" },
+        { "fieldPath": "analyzedAt",   "order": "DESCENDING" }
+      ]
+    },
+    // High-risk AI results for admin/officer dashboards
+    {
+      "collectionGroup": "ai_analyses",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "riskLevel",  "order": "ASCENDING" },
+        { "fieldPath": "aiScore",    "order": "ASCENDING" },
+        { "fieldPath": "analyzedAt", "order": "DESCENDING" }
+      ]
+    },
+
+    // ───────────────────────────────────────────────
+    // AUDIT LOGS
+    // ───────────────────────────────────────────────
+
+    // Audit logs by user + time
+    {
+      "collectionGroup": "audit_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    // Audit logs by target document + time
+    {
+      "collectionGroup": "audit_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "targetId",  "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    // Audit logs by action type + time
+    {
+      "collectionGroup": "audit_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "action",    "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+    // Audit logs by role + time (admin reviewing officer actions)
+    {
+      "collectionGroup": "audit_logs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "role",      "order": "ASCENDING" },
+        { "fieldPath": "timestamp", "order": "DESCENDING" }
+      ]
+    },
+
+    // ───────────────────────────────────────────────
+    // NOTIFICATIONS
+    // ───────────────────────────────────────────────
+
+    // User's unread notifications
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING" },
+        { "fieldPath": "isRead",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    // All notifications for a user ordered by date
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    // Notifications by type for a user
+    {
+      "collectionGroup": "notifications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING" },
+        { "fieldPath": "type",      "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+
+    // ───────────────────────────────────────────────
+    // USERS
+    // ───────────────────────────────────────────────
+
+    // Users by district (officer/admin lookup)
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "districtId", "order": "ASCENDING" },
+        { "fieldPath": "role",       "order": "ASCENDING" }
+      ]
+    },
+    // Users by bank (bank manager lookup)
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bankId", "order": "ASCENDING" },
+        { "fieldPath": "role",   "order": "ASCENDING" }
+      ]
+    },
+    // Blocked user lookup
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "isBlocked", "order": "ASCENDING" },
+        { "fieldPath": "role",      "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

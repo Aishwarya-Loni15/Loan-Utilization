@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "751675344581",
+    "project_id": "loan-7e866",
+    "storage_bucket": "loan-7e866.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:751675344581:android:2c4d6205abe93d589512ac",
+        "android_client_info": {
+          "package_name": "com.example.laon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsMiLgp5X-Sb1FM_mrMQC4nqcDDMIasJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

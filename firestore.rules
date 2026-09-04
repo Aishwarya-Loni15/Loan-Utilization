@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions for Role-Based Access Control
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isAdmin() {
+      return hasRole('ADMIN');
+    }
+
+    function isStateOfficer() {
+      return hasRole('STATE_OFFICER');
+    }
+
+    function isBankManager() {
+      return hasRole('BANK_MANAGER');
+    }
+
+    function isBeneficiary() {
+      return hasRole('BENEFICIARY');
+    }
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin();
+      allow delete: if false; // Immutability rule
+    }
+
+    // 2. Beneficiaries Collection
+    match /beneficiaries/{beneficiaryId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAdmin() || isBankManager();
+      allow delete: if false;
+    }
+
+    // 3. Loans Collection
+    match /loans/{loanId} {
+      allow read: if isAuthenticated() && (
+        isAdmin() || isBankManager() || isStateOfficer() ||
+        resource.data.beneficiaryId == request.auth.uid ||
+        resource.data.beneficiaryEmail == request.auth.token.email
+      );
+      allow create, update: if isAdmin() || isBankManager();
+      allow delete: if false; // State Officer & Beneficiary cannot modify loan values
+    }
+
+    // 4. Loan Link Tokens Collection (Single-use, 15-min expiry)
+    match /loan_link_tokens/{tokenId} {
+      allow read: if isAuthenticated();
+      allow create: if isBankManager() || isAdmin();
+      allow update: if isAuthenticated() && (request.resource.data.used == true || request.resource.data.isInvalidated == true);
+      allow delete: if false;
+    }
+
+    // 5. Utilization Submissions Collection
+    match /utilization_submissions/{submissionId} {
+      allow read: if isAuthenticated();
+      allow create: if isBeneficiary();
+      allow update: if isBankManager() || isAdmin();
+      allow delete: if false;
+    }
+
+    // 6. Notifications Collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow delete: if false;
+    }
+
+    // 7. Audit Logs Collection (Append-only)
+    match /audit_logs/{logId} {
+      allow read: if isAdmin() || isStateOfficer();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Strict append-only audit trail
+    }
+  }
+}

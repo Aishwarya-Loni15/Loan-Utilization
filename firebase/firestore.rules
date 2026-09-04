@@ -1,0 +1,78 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LOANLENS — Firestore Security Rules
+// Configured to permit initial database setup, seeding, and standard operations.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // USERS COLLECTION
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+
+    // LOANS COLLECTION
+    match /loans/{loanId} {
+      allow read, write: if true;
+    }
+
+    // QR LINKING TOKENS COLLECTION
+    match /qr_linking_tokens/{tokenId} {
+      allow read, write: if true;
+    }
+
+    // UTILIZATION SUBMISSIONS COLLECTION
+    match /utilization_submissions/{submissionId} {
+      allow read, write: if true;
+    }
+
+    // AI ANALYSES COLLECTION
+    match /ai_analyses/{analysisId} {
+      allow read, write: if true;
+    }
+
+    // AUDIT LOGS COLLECTION
+    match /audit_logs/{logId} {
+      allow read, write: if true;
+    }
+
+    // NOTIFICATIONS COLLECTION
+    match /notifications/{notificationId} {
+      allow read, write: if true;
+    }
+
+    // LOCATION HIERARCHY (States, Districts, Talukas, Villages)
+    match /states/{stateId} {
+      allow read, write: if true;
+    }
+
+    match /districts/{districtId} {
+      allow read, write: if true;
+    }
+
+    match /talukas/{talukaId} {
+      allow read, write: if true;
+    }
+
+    match /villages/{villageId} {
+      allow read, write: if true;
+    }
+
+    // BANKS COLLECTION
+    match /banks/{bankId} {
+      allow read, write: if true;
+    }
+
+    // SYSTEM / ANALYTICS COLLECTION
+    match /analytics/{docId} {
+      allow read, write: if true;
+    }
+
+    // CATCH-ALL
+    match /{document=**} {
+      allow read, write: if true;
+    }
+  }
+}

@@ -1,0 +1,32 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isLessThan5MB() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    function isValidFileType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('video/.*') ||
+             request.resource.contentType == 'application/pdf';
+    }
+
+    // Evidence upload storage path
+    match /submissions/{loanId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isLessThan5MB() && isValidFileType();
+      allow delete: if false;
+    }
+
+    // Reports storage path
+    match /reports/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && isLessThan5MB();
+    }
+  }
+}
