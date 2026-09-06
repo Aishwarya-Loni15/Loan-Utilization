@@ -74,26 +74,41 @@ class AuthRepositoryImpl implements AuthRepository {
 
 
 
-  @override
-  Future<UserEntity> login({required String email, required String password}) async {
-    try {
-      final storage = LocalStorageService();
-      final cleanEmail = email.trim().toLowerCase();
-      final cleanDigits = cleanEmail.replaceAll(RegExp(r'\D'), '');
+  Map<String, String> _getRegisteredPasswords() {
+    final storage = LocalStorageService();
+    final jsonMap = storage.getJson('registered_passwords') ?? {};
+    final Map<String, String> passwords = {};
+    jsonMap.forEach((k, v) => passwords[k.toString().toLowerCase().trim()] = v.toString());
 
-      if (cleanEmail.isEmpty) {
-        throw const AuthFailure(message: 'Please enter your registered email address.');
-      }
-      if (password.trim().isEmpty) {
-        throw const AuthFailure(message: 'Please enter your password.');
-      }
+    // Default registered demo account passwords
+    passwords.putIfAbsent('admin@loanlens.gov.in', () => 'admin123');
+    passwords.putIfAbsent('manager.sbi@bank.co.in', () => 'manager123');
+    passwords.putIfAbsent('officer.solapur@loanlens.gov.in', () => 'officer123');
+    passwords.putIfAbsent('ramesh.farmer@gmail.com', () => 'farmer123');
 
-      // 1. Explicit Password Check for Demo Accounts
+    return passwords;
+  }
+
+  Future<void> _saveRegisteredPassword(String email, String password) async {
+    final storage = LocalStorageService();
+    final passwords = _getRegisteredPasswords();
+    passwords[email.trim().toLowerCase()] = password;
+    await storage.setJson('registered_passwords', passwords);
+  }
+
+  Future<UserModel?> _getUserByEmailOrRole(String email) async {
+    final cleanEmail = email.trim().toLowerCase();
+
+    // Check MockDatabaseService
+    var user = MockDatabaseService().users.where((u) => u.email.trim().toLowerCase() == cleanEmail).firstOrNull;
+
+    // Check Firestore
+    user ??= await _userRemoteDataSource.getUserByEmail(cleanEmail);
+
+    // Fallbacks for standard roles if not found in DB
+    if (user == null) {
       if (cleanEmail == 'admin@loanlens.gov.in') {
-        if (password != 'admin123') {
-          throw const AuthFailure(message: 'Invalid password. Please enter your valid registered password.');
-        }
-        final admin = UserModel(
+        user = const UserModel(
           uid: 'user_admin_01',
           email: 'admin@loanlens.gov.in',
           name: 'Rajesh Sharma (Admin)',
@@ -105,185 +120,148 @@ class AuthRepositoryImpl implements AuthRepository {
           village: 'vlg_kav',
           address: 'HQ, Mumbai',
         );
-        await storage.setBool('is_admin_logged_in', true);
-        await storage.setString('logged_in_user_uid', admin.uid);
-        return admin;
+      } else if (cleanEmail == 'manager.sbi@bank.co.in') {
+        user = const UserModel(
+          uid: 'user_bank_sbi',
+          email: 'manager.sbi@bank.co.in',
+          name: 'Amitabh Deshmukh',
+          phone: '+919422003311',
+          role: UserRole.bankManager,
+          state: 'st_mah',
+          district: 'dst_sol',
+          taluka: 'tlk_pan',
+          village: 'vlg_kav',
+          address: 'SBI Branch, Pandharpur',
+          bankId: 'bnk_sbi_sol',
+        );
+      } else if (cleanEmail == 'officer.solapur@loanlens.gov.in') {
+        user = const UserModel(
+          uid: 'user_officer_sol',
+          email: 'officer.solapur@loanlens.gov.in',
+          name: 'Priya Kulkarni',
+          phone: '+919822110044',
+          role: UserRole.stateOfficer,
+          state: 'st_mah',
+          district: 'dst_sol',
+          taluka: 'tlk_pan',
+          village: 'vlg_kav',
+          address: 'District Collectorate, Solapur',
+        );
+      } else if (cleanEmail == 'ramesh.farmer@gmail.com') {
+        user = const UserModel(
+          uid: 'user_ben_01',
+          email: 'ramesh.farmer@gmail.com',
+          name: 'Ramesh Vitthal Patil',
+          phone: '+919850123456',
+          role: UserRole.beneficiary,
+          state: 'st_mah',
+          district: 'dst_sol',
+          taluka: 'tlk_pan',
+          village: 'vlg_kav',
+          address: 'Gat No. 142, Kavathe Village, Pandharpur',
+        );
+      }
+    }
+
+    if (user != null && user.role == UserRole.bankManager && (user.bankId == null || user.bankId!.isEmpty)) {
+      user = UserModel(
+        uid: user.uid,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        state: user.state,
+        district: user.district,
+        taluka: user.taluka,
+        village: user.village,
+        role: user.role,
+        bankId: 'bnk_sbi_sol',
+        branchId: user.branchId,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        isActive: user.isActive,
+      );
+    }
+
+    return user;
+  }
+
+  @override
+  Future<UserEntity> login({required String email, required String password}) async {
+    try {
+      final storage = LocalStorageService();
+      final cleanEmail = email.trim().toLowerCase();
+
+      if (cleanEmail.isEmpty) {
+        throw const AuthFailure(message: 'Please enter your registered email address.');
+      }
+      if (password.trim().isEmpty) {
+        throw const AuthFailure(message: 'Please enter your password.');
       }
 
-      if (cleanEmail == 'manager.sbi@bank.co.in' || cleanEmail == 'manager') {
-        if (password != 'manager123') {
-          throw const AuthFailure(message: 'Invalid password. Please enter your valid registered password.');
+      final registeredPasswords = _getRegisteredPasswords();
+
+      // Short-name demo account aliases check (e.g. "manager", "officer", "farmer")
+      String effectiveEmail = cleanEmail;
+      if (cleanEmail == 'admin') effectiveEmail = 'admin@loanlens.gov.in';
+      if (cleanEmail == 'manager') effectiveEmail = 'manager.sbi@bank.co.in';
+      if (cleanEmail == 'officer') effectiveEmail = 'officer.solapur@loanlens.gov.in';
+      if (cleanEmail == 'farmer') effectiveEmail = 'ramesh.farmer@gmail.com';
+
+      // 1. Check if email is in registered passwords map
+      if (registeredPasswords.containsKey(effectiveEmail)) {
+        if (registeredPasswords[effectiveEmail] != password) {
+          throw const AuthFailure(message: 'Invalid email or password.');
         }
-        final manager = MockDatabaseService().users.where((u) => u.role == UserRole.bankManager).firstOrNull ??
-            const UserModel(
-              uid: 'user_bank_sbi',
-              email: 'manager.sbi@bank.co.in',
-              name: 'Amitabh Deshmukh',
-              phone: '+919422003311',
-              role: UserRole.bankManager,
-              state: 'st_mah',
-              district: 'dst_sol',
-              taluka: 'tlk_pan',
-              village: 'vlg_kav',
-              address: 'SBI Branch, Pandharpur',
-              bankId: 'bnk_sbi_sol',
-            );
-        await storage.setBool('is_user_logged_in', true);
-        await storage.setString('logged_in_user_uid', manager.uid);
-        return manager;
-      }
 
-      if (cleanEmail == 'officer.solapur@loanlens.gov.in' || cleanEmail == 'officer') {
-        if (password != 'officer123') {
-          throw const AuthFailure(message: 'Invalid password. Please enter your valid registered password.');
+        final user = await _getUserByEmailOrRole(effectiveEmail);
+        if (user != null) {
+          if (user.role == UserRole.admin) {
+            await storage.setBool('is_admin_logged_in', true);
+          } else {
+            await storage.setBool('is_user_logged_in', true);
+          }
+          await storage.setString('logged_in_user_uid', user.uid);
+          return user;
         }
-        final officer = MockDatabaseService().users.where((u) => u.role == UserRole.stateOfficer).firstOrNull ??
-            const UserModel(
-              uid: 'user_officer_sol',
-              email: 'officer.solapur@loanlens.gov.in',
-              name: 'Priya Kulkarni',
-              phone: '+919822110044',
-              role: UserRole.stateOfficer,
-              state: 'st_mah',
-              district: 'dst_sol',
-              taluka: 'tlk_pan',
-              village: 'vlg_kav',
-              address: 'District Collectorate, Solapur',
-            );
-        await storage.setBool('is_user_logged_in', true);
-        await storage.setString('logged_in_user_uid', officer.uid);
-        return officer;
       }
 
-      if (cleanEmail == 'ramesh.farmer@gmail.com' || cleanEmail == 'farmer') {
-        if (password != 'farmer123') {
-          throw const AuthFailure(message: 'Invalid password. Please enter your valid registered password.');
-        }
-        final beneficiary = MockDatabaseService().users.where((u) => u.role == UserRole.beneficiary).firstOrNull ??
-            const UserModel(
-              uid: 'user_ben_01',
-              email: 'ramesh.farmer@gmail.com',
-              name: 'Ramesh Vitthal Patil',
-              phone: '+919850123456',
-              role: UserRole.beneficiary,
-              state: 'st_mah',
-              district: 'dst_sol',
-              taluka: 'tlk_pan',
-              village: 'vlg_kav',
-              address: 'Gat No. 142, Kavathe Village, Pandharpur',
-            );
-        await storage.setBool('is_user_logged_in', true);
-        await storage.setString('logged_in_user_uid', beneficiary.uid);
-        return beneficiary;
-      }
-
-      // 2. Attempt Firebase Auth Login (if input contains '@')
-      if (cleanEmail.contains('@')) {
+      // 2. Attempt Firebase Auth Login if input contains '@'
+      if (effectiveEmail.contains('@')) {
         try {
           final credential = await _authRemoteDataSource.login(
-            email: cleanEmail,
+            email: effectiveEmail,
             password: password,
           );
           final uid = credential.user!.uid;
+          await _saveRegisteredPassword(effectiveEmail, password);
+
           final user = await _userRemoteDataSource.getUser(uid);
           if (user != null) {
-            await storage.setBool('is_user_logged_in', true);
+            if (user.role == UserRole.admin) {
+              await storage.setBool('is_admin_logged_in', true);
+            } else {
+              await storage.setBool('is_user_logged_in', true);
+            }
             await storage.setString('logged_in_user_uid', user.uid);
             return user;
           }
-
-          final fallbackRole = (cleanEmail.contains('admin'))
-              ? UserRole.admin
-              : (cleanEmail.contains('officer'))
-                  ? UserRole.stateOfficer
-                  : (cleanEmail.contains('manager') || cleanEmail.contains('bank'))
-                      ? UserRole.bankManager
-                      : UserRole.beneficiary;
-
-          final fallbackUser = UserModel(
-            uid: uid,
-            email: credential.user?.email ?? cleanEmail,
-            name: credential.user?.displayName ?? cleanEmail.split('@').first,
-            phone: credential.user?.phoneNumber ?? '',
-            role: fallbackRole,
-            bankId: fallbackRole == UserRole.bankManager ? 'bnk_sbi_sol' : null,
-            state: 'Maharashtra',
-            district: 'Solapur',
-            taluka: 'Pandharpur',
-            village: 'Kavathe',
-            address: 'Registered User Account',
-          );
-          await _userRemoteDataSource.createUser(fallbackUser);
-          await storage.setBool('is_user_logged_in', true);
-          await storage.setString('logged_in_user_uid', fallbackUser.uid);
-          return fallbackUser;
         } catch (e) {
-          // If Firebase Auth returned invalid credentials or wrong password, stop and throw clear error
           final failure = FirebaseExceptionHandler.handleException(e);
-          if (failure is AuthFailure &&
-              (failure.message.contains('Invalid') ||
-                  failure.message.contains('password') ||
-                  failure.message.contains('credential'))) {
-            throw failure;
+          if (failure is AuthFailure) {
+            throw const AuthFailure(message: 'Invalid email or password.');
           }
         }
       }
 
-      // 3. Fallback lookup in Firestore database & Mock database
-      var mockMatch = MockDatabaseService().users.where((u) {
-        final uEmail = u.email.toLowerCase().trim();
-        final uName = u.name.toLowerCase().trim();
-        final uUid = u.uid.toLowerCase().trim();
-        final uPhone = u.phone.replaceAll(RegExp(r'\D'), '');
-        return uEmail == cleanEmail ||
-            uName == cleanEmail ||
-            uUid == cleanEmail ||
-            (cleanDigits.isNotEmpty && uPhone.endsWith(cleanDigits));
-      }).firstOrNull;
-
-      if (mockMatch == null) {
-        try {
-          final allUsers = await _userRemoteDataSource.getAllUsers();
-          mockMatch = allUsers.where((u) {
-            final uEmail = u.email.toLowerCase();
-            final uPhone = u.phone.replaceAll(RegExp(r'\D'), '');
-            return uEmail == cleanEmail || (cleanDigits.isNotEmpty && uPhone.endsWith(cleanDigits));
-          }).firstOrNull;
-        } catch (_) {}
+      // 3. Fallback check for users registered in database without local password cache entry
+      final dbUser = await _getUserByEmailOrRole(effectiveEmail);
+      if (dbUser != null) {
+        // Since user is in DB, check if password was set or matches
+        throw const AuthFailure(message: 'Invalid email or password.');
       }
 
-      if (mockMatch != null) {
-        // Basic password check for registered database accounts
-        if (password.length < 4) {
-          throw const AuthFailure(message: 'Invalid password. Please enter your valid registered password.');
-        }
-
-        final finalUser = (mockMatch.role == UserRole.bankManager && (mockMatch.bankId == null || mockMatch.bankId!.isEmpty))
-            ? UserModel(
-                uid: mockMatch.uid,
-                name: mockMatch.name,
-                email: mockMatch.email,
-                phone: mockMatch.phone,
-                address: mockMatch.address,
-                state: mockMatch.state,
-                district: mockMatch.district,
-                taluka: mockMatch.taluka,
-                village: mockMatch.village,
-                role: mockMatch.role,
-                bankId: 'bnk_sbi_sol',
-                branchId: mockMatch.branchId,
-                createdAt: mockMatch.createdAt,
-                updatedAt: mockMatch.updatedAt,
-                isActive: mockMatch.isActive,
-              )
-            : mockMatch;
-
-        await storage.setBool('is_user_logged_in', true);
-        await storage.setString('logged_in_user_uid', finalUser.uid);
-        return finalUser;
-      }
-
-      throw AuthFailure(message: 'No registered account found for "$email". Please check email or register.');
+      throw const AuthFailure(message: 'Invalid email or password.');
     } catch (e) {
       if (e is Failure) rethrow;
       throw FirebaseExceptionHandler.handleException(e);
@@ -304,10 +282,27 @@ class AuthRepositoryImpl implements AuthRepository {
     required UserRole role,
   }) async {
     try {
+      final cleanEmail = email.trim().toLowerCase();
+      final registeredPasswords = _getRegisteredPasswords();
+
+      // Check if email is already registered
+      if (registeredPasswords.containsKey(cleanEmail)) {
+        throw const AuthFailure(message: 'This email is already registered. Please log in.');
+      }
+
+      final existingUser = MockDatabaseService().users.where((u) => u.email.trim().toLowerCase() == cleanEmail).firstOrNull ??
+          await _userRemoteDataSource.getUserByEmail(cleanEmail);
+      if (existingUser != null) {
+        throw const AuthFailure(message: 'This email is already registered. Please log in.');
+      }
+
+      // Save credential locally so user can log in with registered password
+      await _saveRegisteredPassword(cleanEmail, password);
+
       String uid;
       try {
         final credential = await _authRemoteDataSource.register(
-          email: email,
+          email: cleanEmail,
           password: password,
         );
         uid = credential.user!.uid;
@@ -318,7 +313,7 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = UserModel(
         uid: uid,
         name: name,
-        email: email,
+        email: cleanEmail,
         phone: phone,
         address: address,
         state: state,

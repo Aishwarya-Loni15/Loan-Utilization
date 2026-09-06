@@ -8,6 +8,7 @@ import '../../../../core/enums/user_role.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/services/local_storage_service.dart';
 import '../../../../data/datasources/remote/user_remote_datasource.dart';
 import '../../../../data/models/user_model.dart';
 import '../../../bank/providers/bank_provider.dart';
@@ -223,6 +224,12 @@ class _AddUserDialogState extends ConsumerState<AddUserDialog> {
         role: _selectedRole,
         bankId: _selectedRole == UserRole.bankManager ? _selectedBankId : null,
       );
+
+      // Save user password to registered passwords cache
+      final storage = LocalStorageService();
+      final passwords = storage.getJson('registered_passwords') ?? {};
+      passwords[email.trim().toLowerCase()] = password;
+      await storage.setJson('registered_passwords', passwords);
 
       // Save user to database
       await UserRemoteDataSource().createUser(newUser);
