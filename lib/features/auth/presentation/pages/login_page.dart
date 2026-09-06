@@ -103,44 +103,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
 
-              // Quick Demo Credentials Selector
-              const Text(
-                '⚡ Quick Demo One-Tap Login',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  ActionChip(
-                    avatar: const Icon(Icons.account_balance_rounded, size: 16, color: AppColors.primary),
-                    label: const Text('Bank Manager Login', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.08),
-                    onPressed: () => _handleLogin('manager.sbi@bank.co.in', 'manager123'),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.shield_rounded, size: 16, color: AppColors.secondary),
-                    label: const Text('State Officer Login', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    backgroundColor: AppColors.secondary.withValues(alpha: 0.08),
-                    onPressed: () => _handleLogin('officer.solapur@loanlens.gov.in', 'officer123'),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.admin_panel_settings_rounded, size: 16, color: Colors.purple),
-                    label: const Text('Admin Login', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    backgroundColor: Colors.purple.withValues(alpha: 0.08),
-                    onPressed: () => _handleLogin('admin@loanlens.gov.in', 'admin123'),
-                  ),
-                  ActionChip(
-                    avatar: const Icon(Icons.agriculture_rounded, size: 16, color: AppColors.success),
-                    label: const Text('Beneficiary Login', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                    backgroundColor: AppColors.success.withValues(alpha: 0.08),
-                    onPressed: () => _handleLogin('ramesh.farmer@gmail.com', 'farmer123'),
-                  ),
-                ],
-              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
