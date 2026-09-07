@@ -6,8 +6,6 @@ import '../../providers/auth_provider.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/login_form.dart';
 
-import '../../../../data/datasources/remote/firebase_database_seeder.dart';
-
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
@@ -17,14 +15,11 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   bool _isLoading = false;
-  bool _isSeeding = false;
 
   Future<void> _handleLogin(String email, String password) async {
     setState(() => _isLoading = true);
     try {
       await ref.read(currentUserProvider.notifier).login(email, password);
-      // Auto seed database collections after successful login
-      FirebaseDatabaseSeeder().seedAllCollections().catchError((_) {});
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -36,33 +31,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _seedDatabaseNow() async {
-    setState(() => _isSeeding = true);
-    try {
-      await FirebaseDatabaseSeeder().seedAllCollections();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('🎉 All 13 Collections Created & Populated in Firebase Firestore!'),
-            backgroundColor: AppColors.success,
-            duration: Duration(seconds: 4),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Seeding Error: $e'),
-            backgroundColor: AppColors.danger,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSeeding = false);
     }
   }
 
@@ -103,22 +71,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                 ],
               ),
-
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _isSeeding ? null : _seedDatabaseNow,
-                  icon: _isSeeding
-                      ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                      : const Icon(Icons.cloud_upload_rounded, color: AppColors.primary),
-                  label: Text(_isSeeding ? 'Creating 13 Collections in Firebase...' : 'Seed All 13 Firebase Collections Now'),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ),
             ],
           ),
         ),
@@ -126,4 +78,5 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     );
   }
 }
+
 
