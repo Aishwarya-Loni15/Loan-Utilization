@@ -269,9 +269,10 @@ class LoanDetailsPage extends ConsumerWidget {
                   )
                 else
                   ...loanSubmissions.map((sub) {
-                    final isWrongAmountOrFake = sub.amountSpent > loan.remainingAmount ||
-                        sub.description.toLowerCase().contains('fake') ||
-                        sub.photoUrls.any((p) => p.toLowerCase().contains('fake'));
+                    final isFake = sub.isImageFake;
+                    final isAiGen = sub.isAiGeneratedImage;
+                    final isWrongAmount = sub.amountSpent > loan.remainingAmount;
+                    final isWrongAmountOrFake = isWrongAmount || isFake;
 
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -279,7 +280,9 @@ class LoanDetailsPage extends ConsumerWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         border: Border.all(
-                          color: isWrongAmountOrFake ? AppColors.danger.withValues(alpha: 0.5) : AppColors.border,
+                          color: isAiGen
+                              ? Colors.purple.shade700
+                              : (isWrongAmountOrFake ? AppColors.danger.withValues(alpha: 0.5) : AppColors.border),
                           width: isWrongAmountOrFake ? 1.5 : 1.0,
                         ),
                         boxShadow: [
@@ -301,7 +304,40 @@ class LoanDetailsPage extends ConsumerWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  SubmissionStatusChip(status: sub.status),
+                                  Row(
+                                    children: [
+                                      SubmissionStatusChip(status: sub.status),
+                                      if (isFake) ...[
+                                        const SizedBox(width: 6),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: isAiGen ? Colors.purple.shade900 : Colors.red.shade700,
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Icon(
+                                                isAiGen ? Icons.smart_toy_rounded : Icons.gpp_bad_rounded,
+                                                color: Colors.white,
+                                                size: 12,
+                                              ),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                isAiGen ? '🤖 AI FAKE' : '⚠️ FAKE IMAGE',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                   Text(
                                     '₹${sub.amountSpent.toStringAsFixed(0)}',
                                     style: const TextStyle(
@@ -337,7 +373,41 @@ class LoanDetailsPage extends ConsumerWidget {
                                   ),
                                 ],
                               ),
-                              if (isWrongAmountOrFake) ...[
+                              if (isFake) ...[
+                                const SizedBox(height: 10),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: isAiGen ? Colors.purple.shade50 : AppColors.danger.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: isAiGen ? Colors.purple.shade300 : AppColors.danger.withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        isAiGen ? Icons.smart_toy_rounded : Icons.gpp_bad_rounded,
+                                        size: 16,
+                                        color: isAiGen ? Colors.purple.shade900 : AppColors.danger,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Expanded(
+                                        child: Text(
+                                          isAiGen
+                                              ? '🤖 AI DETECTED: UPLOADED IMAGE IS FAKE (Synthesized AI Deepfake)'
+                                              : '⚠️ AI DETECTED: UPLOADED IMAGE IS FAKE (Digital Manipulation)',
+                                          style: TextStyle(
+                                            color: isAiGen ? Colors.purple.shade900 : AppColors.danger,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ] else if (isWrongAmount) ...[
                                 const SizedBox(height: 10),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -351,7 +421,7 @@ class LoanDetailsPage extends ConsumerWidget {
                                       SizedBox(width: 6),
                                       Expanded(
                                         child: Text(
-                                          '⚠️ WRONG ENTERED AMOUNT / SUSPICIOUS PROOF DETECTED',
+                                          '⚠️ WRONG ENTERED AMOUNT: Claimed amount exceeds remaining balance',
                                           style: TextStyle(
                                             color: AppColors.danger,
                                             fontWeight: FontWeight.bold,

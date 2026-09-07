@@ -33,7 +33,41 @@ class BankVerificationScreen extends ConsumerStatefulWidget {
 class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen> {
   bool _isProcessing = false;
 
-  Future<void> _handleApprove() async {
+  Future<void> _handleApprove({bool isFake = false}) async {
+    if (isFake) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
+            children: const [
+              Icon(Icons.warning_amber_rounded, color: AppColors.danger, size: 28),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text('Override AI Fake Image Flag?'),
+              ),
+            ],
+          ),
+          content: const Text(
+            '⚠️ WARNING: AI Verification Engine detected that the uploaded evidence image is FAKE!\n\nAre you sure you want to approve this proof despite the AI Fake Image alert?',
+            style: TextStyle(fontSize: 13),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.danger),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Confirm Override & Approve'),
+            ),
+          ],
+        ),
+      );
+      if (confirm != true) return;
+    }
+
     setState(() => _isProcessing = true);
     try {
       await ref.read(submitEvidenceNotifierProvider.notifier).review(
@@ -59,8 +93,11 @@ class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen>
     }
   }
 
-  Future<void> _handleReject() async {
-    final controller = TextEditingController();
+  Future<void> _handleReject({bool isFake = false}) async {
+    final defaultReason = isFake
+        ? 'Uploaded proof image is FAKE (AI-generated / Tampered evidence detected).'
+        : '';
+    final controller = TextEditingController(text: defaultReason);
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -369,6 +406,62 @@ class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 0. AI Fake Image Top Banner Alert for Manager
+                if (sub.isImageFake) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    margin: const EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: sub.isAiGeneratedImage
+                          ? Colors.purple.shade900.withValues(alpha: 0.12)
+                          : AppColors.danger.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: sub.isAiGeneratedImage ? Colors.purple.shade700 : AppColors.danger,
+                        width: 2,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          sub.isAiGeneratedImage ? Icons.smart_toy_rounded : Icons.gpp_bad_rounded,
+                          color: sub.isAiGeneratedImage ? Colors.purple.shade900 : AppColors.danger,
+                          size: 32,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                sub.isAiGeneratedImage
+                                    ? '🤖 AI-GENERATED FAKE IMAGE DETECTED'
+                                    : '⚠️ FAKE / TAMPERED PROOF DETECTED',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                  color: sub.isAiGeneratedImage ? Colors.purple.shade900 : AppColors.danger,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                sub.isAiGeneratedImage
+                                    ? 'The AI verification engine detected that the uploaded evidence image is synthesized by generative AI (Deepfake / Synthetic photo). This proof is FLAGGED AS FAKE.'
+                                    : 'The AI verification engine detected digital tampering or unverified image artifacts. This uploaded proof is FLAGGED AS FAKE.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: sub.isAiGeneratedImage ? Colors.purple.shade900 : AppColors.danger,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+
                 // 1. Beneficiary Details Card
                 Container(
                   width: double.infinity,
@@ -900,7 +993,7 @@ class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen>
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          onPressed: _handleApprove,
+                          onPressed: () => _handleApprove(isFake: sub.isImageFake),
                           icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.white),
                           label: const Text('APPROVE PROOF', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
                         ),
@@ -928,7 +1021,7 @@ class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen>
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                               ),
-                              onPressed: _handleReject,
+                              onPressed: () => _handleReject(isFake: sub.isImageFake),
                               icon: const Icon(Icons.cancel_outlined, color: AppColors.danger, size: 18),
                               label: const Text('REJECT PROOF', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.danger)),
                             ),

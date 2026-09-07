@@ -1,5 +1,6 @@
 import '../../core/enums/risk_level.dart';
 import '../../core/enums/submission_status.dart';
+import '../../core/services/ai_verification_engine.dart';
 
 class UtilizationSubmissionEntity {
   final String submissionId;
@@ -60,6 +61,19 @@ class UtilizationSubmissionEntity {
     required this.updatedAt,
   });
 
+  bool get isAiGeneratedImage {
+    final photo = photoUrls.isNotEmpty ? photoUrls.first : '';
+    return AiVerificationEngine.isAiGeneratedPhoto(photo, description);
+  }
+
+  bool get isImageFake {
+    final photo = photoUrls.isNotEmpty ? photoUrls.first : '';
+    return isAiGeneratedImage ||
+        AiVerificationEngine.isFakePhoto(photo, description) ||
+        description.toLowerCase().contains('fake') ||
+        photo.toLowerCase().contains('fake');
+  }
+
   String get fileType {
     if (photoUrls.isNotEmpty && videoUrls.isEmpty && documentUrls.isEmpty) return 'photo';
     if (videoUrls.isNotEmpty && photoUrls.isEmpty && documentUrls.isEmpty) return 'video';
@@ -69,8 +83,9 @@ class UtilizationSubmissionEntity {
 
   String get fileUrl => photoUrls.isNotEmpty ? photoUrls.first : (videoUrls.isNotEmpty ? videoUrls.first : (documentUrls.isNotEmpty ? documentUrls.first : ''));
   DateTime get submittedAt => uploadedAt;
-  String get aiStatus => (isMocked || riskLevel == RiskLevel.high) ? 'PURPOSE_MISMATCH' : 'PURPOSE_MATCH';
+  String get aiStatus => (isMocked || riskLevel == RiskLevel.high || isImageFake) ? 'PURPOSE_MISMATCH' : 'PURPOSE_MATCH';
   double get aiConfidence => aiScore ?? 92.5;
   String get officerStatus => status.value;
   String? get officerRemarks => rejectionReason;
 }
+

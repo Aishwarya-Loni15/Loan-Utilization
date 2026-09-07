@@ -20,7 +20,9 @@ class GeotaggedSubmissionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final photoUrl = submission.photoUrls.isNotEmpty ? submission.photoUrls.first : '';
-    final isHighRisk = submission.riskLevel == RiskLevel.high;
+    final isFake = submission.isImageFake;
+    final isAiGen = submission.isAiGeneratedImage;
+    final isHighRisk = submission.riskLevel == RiskLevel.high || isFake;
 
     return Card(
       elevation: 3,
@@ -28,8 +30,10 @@ class GeotaggedSubmissionCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isHighRisk ? AppColors.danger : AppColors.primary.withValues(alpha: 0.2),
-          width: isHighRisk ? 1.5 : 1.0,
+          color: isAiGen
+              ? Colors.purple.shade700
+              : (isFake ? AppColors.danger : AppColors.primary.withValues(alpha: 0.2)),
+          width: isHighRisk ? 1.8 : 1.0,
         ),
       ),
       child: InkWell(
@@ -67,7 +71,7 @@ class GeotaggedSubmissionCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  _buildRiskBadge(submission.riskLevel, submission.aiScore ?? 0.0),
+                  _buildRiskBadge(submission.riskLevel, submission.aiScore ?? 0.0, isFake: isFake, isAiGen: isAiGen),
                 ],
               ),
               const SizedBox(height: 12),
@@ -76,32 +80,68 @@ class GeotaggedSubmissionCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Geotag Image Thumbnail
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SizedBox(
-                      width: 90,
-                      height: 90,
-                      child: (photoUrl.isNotEmpty && File(photoUrl).existsSync())
-                          ? Image.file(
-                              File(photoUrl),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Image.network(
-                                'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=400',
-                                fit: BoxFit.cover,
-                              ),
-                            )
-                          : Image.network(
-                              photoUrl.startsWith('http')
-                                  ? photoUrl
-                                  : 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=400',
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Image.network(
-                                'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=400',
-                                fit: BoxFit.cover,
-                              ),
+                  // Geotag Image Thumbnail with AI Fake Tag Overlay
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox(
+                          width: 95,
+                          height: 95,
+                          child: (photoUrl.isNotEmpty && File(photoUrl).existsSync())
+                              ? Image.file(
+                                  File(photoUrl),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Image.network(
+                                    'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=400',
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
+                              : Image.network(
+                                  photoUrl.startsWith('http')
+                                      ? photoUrl
+                                      : 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=400',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Image.network(
+                                    'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=400',
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                        ),
+                      ),
+                      if (isFake)
+                        Positioned(
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 3),
+                            decoration: BoxDecoration(
+                              color: isAiGen ? Colors.purple.shade900 : AppColors.danger,
+                              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
                             ),
-                    ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  isAiGen ? Icons.smart_toy_rounded : Icons.gpp_bad_rounded,
+                                  color: Colors.white,
+                                  size: 10,
+                                ),
+                                const SizedBox(width: 3),
+                                Text(
+                                  isAiGen ? 'AI FAKE' : 'FAKE IMAGE',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(width: 14),
 
@@ -184,6 +224,41 @@ class GeotaggedSubmissionCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (isFake) ...[
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isAiGen ? Colors.purple.shade50 : AppColors.danger.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isAiGen ? Colors.purple.shade300 : AppColors.danger.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isAiGen ? Icons.smart_toy_rounded : Icons.gpp_bad_rounded,
+                        color: isAiGen ? Colors.purple.shade900 : AppColors.danger,
+                        size: 16,
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          isAiGen
+                              ? '🤖 AI DETECTED: UPLOADED IMAGE IS FAKE (Synthesized AI Deepfake)'
+                              : '⚠️ AI DETECTED: UPLOADED IMAGE IS FAKE (Digital Manipulation)',
+                          style: TextStyle(
+                            color: isAiGen ? Colors.purple.shade900 : AppColors.danger,
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               const SizedBox(height: 12),
 
               const Divider(height: 1),
@@ -226,27 +301,37 @@ class GeotaggedSubmissionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildRiskBadge(RiskLevel risk, double score) {
+  Widget _buildRiskBadge(RiskLevel risk, double score, {bool isFake = false, bool isAiGen = false}) {
     Color bg;
     Color fg;
     String label;
 
-    switch (risk) {
-      case RiskLevel.low:
-        bg = AppColors.success.withValues(alpha: 0.12);
-        fg = AppColors.success;
-        label = 'Verified ${score.toStringAsFixed(0)}%';
-        break;
-      case RiskLevel.medium:
-        bg = AppColors.warning.withValues(alpha: 0.15);
-        fg = AppColors.warning;
-        label = 'Medium Risk';
-        break;
-      case RiskLevel.high:
-        bg = AppColors.danger.withValues(alpha: 0.15);
-        fg = AppColors.danger;
-        label = 'High Risk Flag';
-        break;
+    if (isAiGen) {
+      bg = Colors.purple.shade100;
+      fg = Colors.purple.shade900;
+      label = '🤖 AI Fake Image';
+    } else if (isFake) {
+      bg = AppColors.danger.withValues(alpha: 0.15);
+      fg = AppColors.danger;
+      label = '⚠️ Fake Image Flag';
+    } else {
+      switch (risk) {
+        case RiskLevel.low:
+          bg = AppColors.success.withValues(alpha: 0.12);
+          fg = AppColors.success;
+          label = 'Verified ${score.toStringAsFixed(0)}%';
+          break;
+        case RiskLevel.medium:
+          bg = AppColors.warning.withValues(alpha: 0.15);
+          fg = AppColors.warning;
+          label = 'Medium Risk';
+          break;
+        case RiskLevel.high:
+          bg = AppColors.danger.withValues(alpha: 0.15);
+          fg = AppColors.danger;
+          label = 'High Risk Flag';
+          break;
+      }
     }
 
     return Container(

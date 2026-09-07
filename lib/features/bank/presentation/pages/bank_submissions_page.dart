@@ -6,9 +6,9 @@ import '../../../../core/enums/submission_status.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/widgets/loading_widget.dart';
-import '../../../beneficiary/presentation/widgets/recent_submission_card.dart';
 import '../../../loans/providers/loan_provider.dart';
 import '../../../utilization/providers/utilization_provider.dart';
+import '../widgets/geotagged_submission_card.dart';
 
 class BankSubmissionsPage extends ConsumerStatefulWidget {
   final String initialFilter; // 'all', 'pending', 'approved', 'rejected', 'highRisk'
@@ -99,7 +99,7 @@ class _BankSubmissionsPageState extends ConsumerState<BankSubmissionsPage> with 
                   ),
                   _buildList(
                     context,
-                    targetSubmissions.where((s) => s.riskLevel == RiskLevel.high).toList(),
+                    targetSubmissions.where((s) => s.riskLevel == RiskLevel.high || s.isImageFake).toList(),
                     emptyTitle: 'No Suspicious Submissions',
                     emptyDesc: 'No suspicious evidence discrepancies detected for this branch.',
                   ),
@@ -136,7 +136,7 @@ class _BankSubmissionsPageState extends ConsumerState<BankSubmissionsPage> with 
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final submission = submissions[index];
-        return RecentSubmissionCard(
+        return GeotaggedSubmissionCard(
           submission: submission,
           onTap: () {
             context.push('/bank-verification/${submission.submissionId}');

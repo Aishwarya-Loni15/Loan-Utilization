@@ -33,6 +33,37 @@ class RecentSubmissionCard extends StatelessWidget {
               ),
               Row(
                 children: [
+                  if (submission.isImageFake) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: submission.isAiGeneratedImage
+                            ? Colors.purple.shade900
+                            : Colors.red.shade700,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            submission.isAiGeneratedImage ? Icons.smart_toy_rounded : Icons.gpp_bad_rounded,
+                            color: Colors.white,
+                            size: 12,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            submission.isAiGeneratedImage ? '🤖 AI FAKE' : '⚠️ FAKE IMAGE',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   SubmissionStatusChip(status: submission.status),
                   const SizedBox(width: 6),
                   const SyncStatusChip(isSynced: true),
