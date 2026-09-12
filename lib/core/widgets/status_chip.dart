@@ -18,17 +18,17 @@ class RiskLevelChip extends StatelessWidget {
 
     switch (level) {
       case RiskLevel.low:
-        bg = AppColors.riskLow.withValues(alpha: 0.12);
+        bg = const Color(0xFFECFDF5);
         fg = AppColors.riskLow;
         icon = Icons.verified_user_rounded;
         break;
       case RiskLevel.medium:
-        bg = AppColors.riskMedium.withValues(alpha: 0.12);
+        bg = const Color(0xFFFFFBEB);
         fg = AppColors.riskMedium;
         icon = Icons.warning_amber_rounded;
         break;
       case RiskLevel.high:
-        bg = AppColors.riskHigh.withValues(alpha: 0.12);
+        bg = const Color(0xFFFEF2F2);
         fg = AppColors.riskHigh;
         icon = Icons.gpp_bad_rounded;
         break;
@@ -36,8 +36,8 @@ class RiskLevelChip extends StatelessWidget {
 
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: isCompact ? 8 : 12,
-        vertical: isCompact ? 4 : 6,
+        horizontal: isCompact ? 8 : 10,
+        vertical: isCompact ? 3 : 5,
       ),
       decoration: BoxDecoration(
         color: bg,
@@ -47,8 +47,8 @@ class RiskLevelChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: isCompact ? 14 : 16, color: fg),
-          const SizedBox(width: 6),
+          Icon(icon, size: isCompact ? 13 : 15, color: fg),
+          const SizedBox(width: 5),
           Text(
             isCompact ? level.value : level.displayName,
             style: TextStyle(
@@ -71,41 +71,61 @@ class SubmissionStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color;
+    Color bg;
+    IconData icon;
+
     switch (status) {
       case SubmissionStatus.approved:
         color = AppColors.success;
+        bg = const Color(0xFFECFDF5);
+        icon = Icons.check_circle_rounded;
         break;
       case SubmissionStatus.rejected:
         color = AppColors.danger;
+        bg = const Color(0xFFFEF2F2);
+        icon = Icons.cancel_rounded;
         break;
       case SubmissionStatus.underOfficerReview:
       case SubmissionStatus.submitted:
       case SubmissionStatus.resubmissionRequired:
       case SubmissionStatus.aiProcessing:
         color = AppColors.warning;
+        bg = const Color(0xFFFFFBEB);
+        icon = Icons.hourglass_top_rounded;
         break;
       case SubmissionStatus.aiVerified:
-        color = AppColors.primary;
+        color = AppColors.primaryViolet;
+        bg = AppColors.lightViolet;
+        icon = Icons.auto_awesome_rounded;
         break;
       case SubmissionStatus.notSubmitted:
-        color = AppColors.textSecondary;
+        color = AppColors.secondaryText;
+        bg = const Color(0xFFF1F0F5);
+        icon = Icons.pending_actions_rounded;
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
-      child: Text(
-        status.displayName,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 5),
+          Text(
+            status.displayName,
+            style: TextStyle(
+              color: color,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -119,35 +139,41 @@ class LoanStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color;
+    Color bg;
+
     switch (status) {
       case LoanStatus.completed:
       case LoanStatus.fullyUtilized:
       case LoanStatus.closed:
         color = AppColors.success;
+        bg = const Color(0xFFECFDF5);
         break;
       case LoanStatus.active:
       case LoanStatus.partiallyUtilized:
       case LoanStatus.disbursed:
       case LoanStatus.registered:
       case LoanStatus.linked:
-        color = AppColors.primary;
+        color = AppColors.primaryViolet;
+        bg = AppColors.lightViolet;
         break;
       case LoanStatus.pending:
       case LoanStatus.approved:
       case LoanStatus.underReview:
         color = AppColors.warning;
+        bg = const Color(0xFFFFFBEB);
         break;
       case LoanStatus.flagged:
       case LoanStatus.rejected:
         color = AppColors.danger;
+        bg = const Color(0xFFFEF2F2);
         break;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(12),
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
@@ -170,27 +196,28 @@ class SyncStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = isSynced ? AppColors.success : AppColors.warning;
-    final label = isSynced ? 'Successfully Synced' : 'Pending Sync';
+    final bg = isSynced ? const Color(0xFFECFDF5) : const Color(0xFFFFFBEB);
+    final label = isSynced ? 'Synced' : 'Pending Sync';
     final icon = isSynced ? Icons.cloud_done_rounded : Icons.sync_problem_rounded;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: color),
-          const SizedBox(width: 6),
+          Icon(icon, size: 13, color: color),
+          const SizedBox(width: 5),
           Text(
             label,
             style: TextStyle(
               color: color,
               fontSize: 11,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -198,3 +225,4 @@ class SyncStatusChip extends StatelessWidget {
     );
   }
 }
+

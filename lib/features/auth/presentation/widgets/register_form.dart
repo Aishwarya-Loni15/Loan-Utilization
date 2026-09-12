@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../app/theme/app_colors.dart';
 import '../../../../core/constants/app_locations.dart';
 import '../../../../core/enums/user_role.dart';
 import '../../../../core/utils/validators.dart';
@@ -188,6 +189,23 @@ class _RegisterFormState extends State<RegisterForm> {
     }
   }
 
+  InputDecoration _buildDropdownDecoration(String labelText, IconData icon) {
+    return InputDecoration(
+      filled: true,
+      fillColor: AppColors.softViolet,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      prefixIcon: Icon(icon, color: AppColors.primaryViolet.withValues(alpha: 0.7), size: 18),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE4DCF2), width: 1.0),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primaryViolet, width: 2.0),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final availableDistricts = _districtsMap[_selectedState] ?? ['Other District'];
@@ -207,7 +225,7 @@ class _RegisterFormState extends State<RegisterForm> {
           AppTextField(
             controller: _nameController,
             label: 'Full Name',
-            hint: 'John Doe',
+            hint: 'Ramesh Sharad Patil',
             prefixIcon: Icons.person_outline,
             validator: (v) => Validators.validateName(v, 'Full Name'),
           ),
@@ -215,7 +233,7 @@ class _RegisterFormState extends State<RegisterForm> {
           AppTextField(
             controller: _emailController,
             label: 'Email Address',
-            hint: 'name@example.com',
+            hint: 'ramesh.patil@example.com',
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.email_outlined,
             validator: Validators.validateEmail,
@@ -229,7 +247,11 @@ class _RegisterFormState extends State<RegisterForm> {
             prefixIcon: Icons.lock_outline,
             validator: Validators.validatePassword,
             suffixIcon: IconButton(
-              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+              icon: Icon(
+                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: AppColors.secondaryText,
+                size: 20,
+              ),
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
@@ -246,7 +268,7 @@ class _RegisterFormState extends State<RegisterForm> {
           AppTextField(
             controller: _addressController,
             label: 'Address',
-            hint: 'House No, Street',
+            hint: 'House No 45, Near Gram Panchayat',
             prefixIcon: Icons.home_outlined,
             validator: (v) => Validators.validateRequired(v, 'Address'),
           ),
@@ -260,24 +282,23 @@ class _RegisterFormState extends State<RegisterForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'State',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: TextStyle(
+                        color: AppColors.darkText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: _selectedState,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.map_outlined),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
+                      decoration: _buildDropdownDecoration('State', Icons.map_outlined),
                       items: _states
                           .map((s) => DropdownMenuItem(
                                 value: s,
-                                child: Text(s, overflow: TextOverflow.ellipsis),
+                                child: Text(s, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
                               ))
                           .toList(),
                       onChanged: (val) {
@@ -301,24 +322,23 @@ class _RegisterFormState extends State<RegisterForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'District',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: TextStyle(
+                        color: AppColors.darkText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: currentDistrict,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.location_city_outlined),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
+                      decoration: _buildDropdownDecoration('District', Icons.location_city_outlined),
                       items: availableDistricts
                           .map((d) => DropdownMenuItem(
                                 value: d,
-                                child: Text(d, overflow: TextOverflow.ellipsis),
+                                child: Text(d, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
                               ))
                           .toList(),
                       onChanged: (val) {
@@ -349,24 +369,23 @@ class _RegisterFormState extends State<RegisterForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Taluka',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: TextStyle(
+                        color: AppColors.darkText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: currentTaluka,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.holiday_village_outlined),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
+                      decoration: _buildDropdownDecoration('Taluka', Icons.holiday_village_outlined),
                       items: availableTalukas
                           .map((t) => DropdownMenuItem(
                                 value: t,
-                                child: Text(t, overflow: TextOverflow.ellipsis),
+                                child: Text(t, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
                               ))
                           .toList(),
                       onChanged: (val) {
@@ -390,24 +409,23 @@ class _RegisterFormState extends State<RegisterForm> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Village',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
+                      style: TextStyle(
+                        color: AppColors.darkText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       isExpanded: true,
                       initialValue: currentVillage,
-                      decoration: const InputDecoration(
-                        prefixIcon: Icon(Icons.home_work_outlined),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-                      ),
+                      decoration: _buildDropdownDecoration('Village', Icons.home_work_outlined),
                       items: availableVillages
                           .map((v) => DropdownMenuItem(
                                 value: v,
-                                child: Text(v, overflow: TextOverflow.ellipsis),
+                                child: Text(v, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13)),
                               ))
                           .toList(),
                       onChanged: (val) {
@@ -430,13 +448,15 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           const SizedBox(height: 24),
           AppButton(
-            text: 'Create Account',
+            text: 'Register Account',
             isLoading: widget.isLoading,
             onPressed: _submit,
+            icon: Icons.person_add_rounded,
           ),
         ],
       ),
     );
   }
 }
+
 

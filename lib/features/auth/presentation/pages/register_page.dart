@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../core/enums/user_role.dart';
+import '../../../../core/widgets/app_card.dart';
 import '../../providers/auth_provider.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/register_form.dart';
@@ -45,9 +46,11 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registration successful! Please log in with your credentials.'),
-            backgroundColor: Colors.green,
+          SnackBar(
+            content: const Text('Registration successful! Please log in with your credentials.'),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
         context.go('/login');
@@ -58,6 +61,8 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
           SnackBar(
             content: Text(e.toString().replaceAll('Exception: ', '')),
             backgroundColor: AppColors.danger,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
         );
       }
@@ -69,25 +74,33 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.lightGray,
       appBar: AppBar(
-        title: const Text('Create Account'),
+        title: const Text('New Registration'),
+        backgroundColor: AppColors.darkViolet,
+        foregroundColor: Colors.white,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const SizedBox(height: 8),
               const AuthHeader(
-                title: 'Register',
-                subtitle: 'Fill in your personal and location details to register on Laon Utilization',
+                title: 'User Registration',
+                subtitle: 'Enter your details and jurisdiction location to register your profile',
               ),
-              const SizedBox(height: 32),
-              RegisterForm(
-                onSubmit: _handleRegister,
-                isLoading: _isLoading,
+              const SizedBox(height: 24),
+              AppCard(
+                padding: const EdgeInsets.all(20.0),
+                elevation: 2,
+                child: RegisterForm(
+                  onSubmit: _handleRegister,
+                  isLoading: _isLoading,
+                ),
               ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -95,3 +108,4 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     );
   }
 }
+

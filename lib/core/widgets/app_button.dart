@@ -8,6 +8,8 @@ class AppButton extends StatelessWidget {
   final bool isOutlined;
   final IconData? icon;
   final Color? backgroundColor;
+  final Color? textColor;
+  final double height;
 
   const AppButton({
     super.key,
@@ -17,60 +19,87 @@ class AppButton extends StatelessWidget {
     this.isOutlined = false,
     this.icon,
     this.backgroundColor,
+    this.textColor,
+    this.height = 50,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveBg = backgroundColor ?? AppColors.primaryViolet;
+
     if (isOutlined) {
       return OutlinedButton(
         onPressed: isLoading ? null : onPressed,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: backgroundColor ?? AppColors.primary),
-          minimumSize: const Size(double.infinity, 52),
+          foregroundColor: textColor ?? effectiveBg,
+          side: BorderSide(color: effectiveBg, width: 1.5),
+          minimumSize: Size(double.infinity, height),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: _buildChild(),
+        child: _buildChild(textColor ?? effectiveBg),
       );
     }
 
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor ?? AppColors.primary,
-        minimumSize: const Size(double.infinity, 52),
+        backgroundColor: effectiveBg,
+        foregroundColor: textColor ?? Colors.white,
+        elevation: 1,
+        minimumSize: Size(double.infinity, height),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-      child: _buildChild(),
+      child: _buildChild(textColor ?? Colors.white),
     );
   }
 
-  Widget _buildChild() {
+  Widget _buildChild(Color color) {
     if (isLoading) {
-      return const SizedBox(
-        height: 24,
-        width: 24,
+      return SizedBox(
+        height: 20,
+        width: 20,
         child: CircularProgressIndicator(
-          strokeWidth: 2.5,
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+          strokeWidth: 2.2,
+          valueColor: AlwaysStoppedAnimation<Color>(color),
         ),
       );
     }
 
     if (icon != null) {
       return Row(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 20),
+          Icon(icon, size: 18, color: color),
           const SizedBox(width: 8),
-          Text(text),
+          Text(
+            text,
+            style: TextStyle(
+              color: color,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.2,
+            ),
+          ),
         ],
       );
     }
 
-    return Text(text);
+    return Text(
+      text,
+      style: TextStyle(
+        color: color,
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.2,
+      ),
+    );
   }
 }
+

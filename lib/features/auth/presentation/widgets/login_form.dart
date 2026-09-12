@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/validators.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../app/theme/app_colors.dart';
 
 class LoginForm extends StatefulWidget {
   final Future<void> Function(String email, String password) onSubmit;
@@ -51,12 +52,12 @@ class _LoginFormState extends State<LoginForm> {
           AppTextField(
             controller: _emailController,
             label: 'Email Address',
-            hint: 'name@example.com',
+            hint: 'officer@maharashtra.gov.in',
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.email_outlined,
             validator: Validators.validateEmail,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 18),
           AppTextField(
             controller: _passwordController,
             label: 'Password',
@@ -66,7 +67,9 @@ class _LoginFormState extends State<LoginForm> {
             validator: Validators.validatePassword,
             suffixIcon: IconButton(
               icon: Icon(
-                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: AppColors.secondaryText,
+                size: 20,
               ),
               onPressed: () {
                 setState(() {
@@ -75,7 +78,7 @@ class _LoginFormState extends State<LoginForm> {
               },
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -86,18 +89,24 @@ class _LoginFormState extends State<LoginForm> {
               },
               child: const Text(
                 'Forgot Password?',
-                style: TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: AppColors.primaryViolet,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           AppButton(
-            text: 'Sign In',
+            text: 'Sign In to Portal',
             isLoading: widget.isLoading,
             onPressed: _submit,
+            icon: Icons.login_rounded,
           ),
         ],
       ),
     );
   }
 }
+

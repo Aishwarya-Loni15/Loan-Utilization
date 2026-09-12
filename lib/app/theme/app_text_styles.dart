@@ -1,34 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'app_colors.dart';
 
 class AppTextStyles {
-  static const TextStyle displayLarge = TextStyle(
-    fontSize: 32,
+  static TextStyle displayLarge = GoogleFonts.inter(
+    fontSize: 28,
     fontWeight: FontWeight.bold,
+    color: AppColors.darkText,
     letterSpacing: -0.5,
   );
 
-  static const TextStyle titleLarge = TextStyle(
+  static TextStyle titleLarge = GoogleFonts.inter(
     fontSize: 20,
     fontWeight: FontWeight.w700,
+    color: AppColors.darkText,
   );
 
-  static const TextStyle titleMedium = TextStyle(
+  static TextStyle titleMedium = GoogleFonts.inter(
     fontSize: 16,
     fontWeight: FontWeight.w600,
+    color: AppColors.darkText,
   );
 
-  static const TextStyle bodyLarge = TextStyle(
-    fontSize: 16,
+  static TextStyle bodyLarge = GoogleFonts.inter(
+    fontSize: 15,
     fontWeight: FontWeight.normal,
+    color: AppColors.darkText,
   );
 
-  static const TextStyle bodyMedium = TextStyle(
-    fontSize: 14,
+  static TextStyle bodyMedium = GoogleFonts.inter(
+    fontSize: 13,
     fontWeight: FontWeight.normal,
+    color: AppColors.secondaryText,
   );
 
-  static const TextStyle labelSmall = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
+  static TextStyle labelSmall = GoogleFonts.inter(
+    fontSize: 11,
+    fontWeight: FontWeight.w600,
+    color: AppColors.secondaryText,
   );
 }
+
