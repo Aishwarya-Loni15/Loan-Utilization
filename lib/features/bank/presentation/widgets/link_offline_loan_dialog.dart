@@ -9,11 +9,12 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/loan_qr_dialog.dart';
 import '../../../../domain/entities/loan.dart';
 import '../../../../data/datasources/remote/user_remote_datasource.dart';
+import '../../../../data/datasources/remote/loan_remote_datasource.dart';
+import '../../../../data/models/loan_model.dart';
+import '../../../../data/models/user_model.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../loans/providers/loan_provider.dart';
 import '../../providers/bank_provider.dart';
-
-import '../../../../data/models/user_model.dart';
 
 class LinkOfflineLoanDialog extends ConsumerStatefulWidget {
   final String? initialEmail;
