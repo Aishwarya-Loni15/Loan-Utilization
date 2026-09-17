@@ -223,6 +223,49 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
 
       await ref.read(createLoanUseCaseProvider).call(newLoan);
 
+      // Auto-link any existing unlinked loans matching this beneficiary email/mobile
+      try {
+        final allLoans = await LoanRemoteDataSource().getLoans();
+        final matchingUnlinked = allLoans.where((l) =>
+          ((l.beneficiaryEmail ?? '').trim().toLowerCase() == currentEmail ||
+           (l.beneficiaryMobile ?? '').trim() == _mobileController.text.trim()) &&
+          (l.beneficiaryId != _matchedUid || !l.isLinked)
+        ).toList();
+
+        for (final unlinked in matchingUnlinked) {
+          final relinked = LoanModel(
+            loanId: unlinked.loanId,
+            loanAccountNumber: unlinked.loanAccountNumber,
+            beneficiaryId: _matchedUid ?? unlinked.beneficiaryId,
+            bankId: unlinked.bankId,
+            bankManagerId: unlinked.bankManagerId,
+            schemeName: unlinked.schemeName,
+            purpose: unlinked.purpose,
+            category: unlinked.category,
+            sanctionedAmount: unlinked.sanctionedAmount,
+            disbursedAmount: unlinked.disbursedAmount,
+            utilizedAmount: unlinked.utilizedAmount,
+            remainingAmount: unlinked.remainingAmount,
+            utilizationPercentage: unlinked.utilizationPercentage,
+            disbursementDate: unlinked.disbursementDate,
+            expectedUtilizationDate: unlinked.expectedUtilizationDate,
+            status: unlinked.status,
+            createdAt: unlinked.createdAt,
+            updatedAt: now,
+            beneficiaryName: _beneficiaryNameController.text.trim(),
+            beneficiaryMobile: _mobileController.text.trim(),
+            beneficiaryEmail: currentEmail,
+            bankName: unlinked.bankName,
+            branchName: unlinked.branchName,
+            district: unlinked.district,
+            taluka: unlinked.taluka,
+            village: unlinked.village,
+            isLinked: true,
+          );
+          await LoanRemoteDataSource().updateLoan(relinked);
+        }
+      } catch (_) {}
+
       ref.invalidate(allLoansProvider);
       ref.invalidate(bankLoansProvider);
       ref.invalidate(userLoansProvider);
@@ -232,7 +275,7 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Offline Loan "$loanAccNo" for ₹${disbursedAmount.toStringAsFixed(0)} money disbursed successfully registered & redirected to ${_matchedUser?.name ?? _emailController.text.trim()}!'),
+            content: Text('Offline Loan "$loanAccNo" for ₹${disbursedAmount.toStringAsFixed(0)} money disbursed successfully registered & linked directly to ${_matchedUser?.name ?? _emailController.text.trim()}!'),
             backgroundColor: AppColors.success,
           ),
         );
