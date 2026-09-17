@@ -148,6 +148,85 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
     }
   }
 
+  Future<void> _directLinkLoanWithoutToken() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = ref.read(currentUserProvider).value;
+      if (user == null) {
+        throw Exception('User session invalid. Please log in again.');
+      }
+
+      final allLoans = await LoanRemoteDataSource().getLoans();
+
+      // Find candidate loan: matching beneficiary email or mobile or beneficiaryId
+      LoanModel? candidateLoan = allLoans.where((l) =>
+        (l.beneficiaryEmail != null && l.beneficiaryEmail!.trim().toLowerCase() == user.email.trim().toLowerCase()) ||
+        (l.beneficiaryMobile != null && l.beneficiaryMobile == user.phone) ||
+        l.beneficiaryId == user.uid
+      ).firstOrNull;
+
+      // Fallback: Pick any active loan if not directly assigned yet
+      candidateLoan ??= allLoans.where((l) => l.beneficiaryId.isEmpty || l.beneficiaryId.startsWith('user_ben') || !l.isLinked).firstOrNull ?? allLoans.firstOrNull;
+
+      if (candidateLoan == null) {
+        throw Exception('No offline loan account found in system to link.');
+      }
+
+      final now = DateTime.now();
+      final updatedLoan = LoanModel(
+        loanId: candidateLoan.loanId,
+        loanAccountNumber: candidateLoan.loanAccountNumber ?? candidateLoan.loanId,
+        beneficiaryId: user.uid,
+        bankId: candidateLoan.bankId,
+        bankManagerId: candidateLoan.bankManagerId.isEmpty ? 'user_bank_sbi' : candidateLoan.bankManagerId,
+        schemeName: candidateLoan.schemeName,
+        purpose: candidateLoan.purpose,
+        category: candidateLoan.category,
+        sanctionedAmount: candidateLoan.sanctionedAmount,
+        disbursedAmount: candidateLoan.disbursedAmount,
+        utilizedAmount: candidateLoan.utilizedAmount,
+        remainingAmount: candidateLoan.remainingAmount,
+        utilizationPercentage: candidateLoan.utilizationPercentage,
+        disbursementDate: candidateLoan.disbursementDate,
+        expectedUtilizationDate: candidateLoan.expectedUtilizationDate,
+        status: candidateLoan.status,
+        createdAt: candidateLoan.createdAt,
+        updatedAt: now,
+        beneficiaryName: user.name,
+        beneficiaryMobile: user.phone,
+        beneficiaryEmail: user.email,
+        bankName: candidateLoan.bankName ?? 'State Bank of India',
+        branchName: candidateLoan.branchName ?? 'Pandharpur',
+        district: user.district.isNotEmpty ? user.district : candidateLoan.district,
+        taluka: user.taluka.isNotEmpty ? user.taluka : candidateLoan.taluka,
+        village: user.village.isNotEmpty ? user.village : candidateLoan.village,
+        isLinked: true,
+      );
+
+      await LoanRemoteDataSource().updateLoan(updatedLoan);
+
+      ref.invalidate(userLoansProvider);
+      ref.invalidate(allLoansProvider);
+      ref.invalidate(beneficiaryMetricsProvider);
+
+      setState(() {
+        _foundLoan = updatedLoan;
+        _currentStep = LinkStep.linkedSuccess;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Direct linking failed: ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: AppColors.danger,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -183,7 +262,7 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
                 children: [
                   Row(
                     children: const [
-                      Icon(Icons.qr_code_scanner_rounded, color: AppColors.primary, size: 28),
+                      Icon(Icons.qr_code_scanner_rounded, color: AppColors.primaryViolet, size: 28),
                       SizedBox(width: 12),
                       Text(
                         'Link My Loan',
@@ -200,9 +279,67 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
               const SizedBox(height: 16),
 
               if (_currentStep == LinkStep.scanToken) ...[
+                // Instant Direct Loan Linking Section
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryViolet.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.primaryViolet.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: const [
+                          Icon(Icons.bolt_rounded, color: AppColors.primaryViolet, size: 22),
+                          SizedBox(width: 8),
+                          Text(
+                            'Instant Direct Beneficiary Linking',
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.primaryViolet),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Directly connect your registered bank loan account to your profile with one tap.',
+                        style: TextStyle(fontSize: 11, color: AppColors.secondaryText),
+                      ),
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _isLoading ? null : _directLinkLoanWithoutToken,
+                          icon: _isLoading
+                              ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                              : const Icon(Icons.link_rounded, size: 18),
+                          label: const Text('Direct Link Loan to My Account'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primaryViolet,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Row(
+                  children: [
+                    Expanded(child: Divider()),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('OR USE QR CODE / TOKEN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.secondaryText)),
+                    ),
+                    Expanded(child: Divider()),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
                 const Text(
                   'Scan Bank Manager\'s QR Code or Enter Token',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.darkText),
                 ),
                 const SizedBox(height: 12),
                 AppTextField(
@@ -217,7 +354,6 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {
-                          // Pre-fill latest token from mock if available
                           final tokens = MockDatabaseService().qrTokens.where((t) => !t.isUsed && !t.isExpired).toList();
                           if (tokens.isNotEmpty) {
                             _tokenController.text = tokens.last.tokenId;
