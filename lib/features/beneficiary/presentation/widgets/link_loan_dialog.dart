@@ -48,7 +48,31 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
     if (widget.initialToken != null && widget.initialToken!.isNotEmpty) {
       _tokenController.text = widget.initialToken!;
       _validateToken();
+    } else {
+      _checkForMatchingLoan();
     }
+  }
+
+  Future<void> _checkForMatchingLoan() async {
+    try {
+      final user = ref.read(currentUserProvider).value;
+      if (user == null) return;
+      final allLoans = await LoanRemoteDataSource().getLoans();
+
+      LoanModel? candidate = allLoans.where((l) =>
+        (l.beneficiaryEmail != null && l.beneficiaryEmail!.trim().toLowerCase() == user.email.trim().toLowerCase()) ||
+        (l.beneficiaryMobile != null && l.beneficiaryMobile == user.phone) ||
+        l.beneficiaryId == user.uid
+      ).firstOrNull;
+
+      candidate ??= allLoans.where((l) => l.beneficiaryId.isEmpty || l.beneficiaryId.startsWith('user_ben') || !l.isLinked).firstOrNull;
+
+      if (candidate != null && mounted) {
+        setState(() {
+          _foundLoan = candidate;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
