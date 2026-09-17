@@ -104,7 +104,81 @@ class _LoginFormState extends State<LoginForm> {
             onPressed: _submit,
             icon: Icons.login_rounded,
           ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.lightGray,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.key_outlined, size: 16, color: AppColors.primaryViolet),
+                    SizedBox(width: 6),
+                    Text(
+                      'Demo Credentials (Tap to Auto-fill)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryDark,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _buildDemoChip('Admin', 'admin@loanlens.gov.in', 'admin123'),
+                    _buildDemoChip('Officer', 'officer.solapur@loanlens.gov.in', 'officer123'),
+                    _buildDemoChip('Manager', 'manager.sbi@bank.co.in', 'manager123'),
+                    _buildDemoChip('Farmer', 'ramesh.farmer@gmail.com', 'farmer123'),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDemoChip(String role, String email, String password) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _emailController.text = email;
+          _passwordController.text = password;
+        });
+      },
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppColors.primaryViolet.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.person_outline, size: 13, color: AppColors.primaryViolet),
+            const SizedBox(width: 4),
+            Text(
+              role,
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryDark,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
