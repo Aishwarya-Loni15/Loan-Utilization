@@ -26,11 +26,7 @@ class LinkLoanDialog extends ConsumerStatefulWidget {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
-      builder: (context) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        backgroundColor: Colors.transparent,
-        child: LinkLoanDialog(initialToken: initialToken),
-      ),
+      builder: (context) => LinkLoanDialog(initialToken: initialToken),
     );
   }
 
@@ -45,7 +41,6 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
   bool _isLoading = false;
   QrLinkingTokenModel? _validatedToken;
   LoanModel? _foundLoan;
-
 
   @override
   void initState() {
@@ -229,30 +224,26 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 20,
-            spreadRadius: 4,
-          ),
-        ],
-      ),
-      padding: EdgeInsets.only(
-        top: 20,
-        left: 20,
-        right: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+    final mediaQuery = MediaQuery.of(context);
+    final maxHeight = mediaQuery.size.height * 0.85;
+
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxHeight,
+          maxWidth: 500,
+        ),
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: mediaQuery.viewInsets.bottom + 20,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
