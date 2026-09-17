@@ -226,7 +226,6 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final dialogWidth = mediaQuery.size.width > 550 ? 500.0 : mediaQuery.size.width * 0.9;
-    final maxHeight = mediaQuery.size.height * 0.85;
 
     return Dialog(
       backgroundColor: Colors.white,
