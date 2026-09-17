@@ -336,11 +336,15 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
                     const SizedBox(width: 8),
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
-                      child: OutlinedButton(
-                        onPressed: _isSearchingUser ? null : _lookupBeneficiaryByEmail,
-                        child: _isSearchingUser
-                            ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Text('Verify'),
+                      child: SizedBox(
+                        width: 80,
+                        height: 48,
+                        child: OutlinedButton(
+                          onPressed: _isSearchingUser ? null : _lookupBeneficiaryByEmail,
+                          child: _isSearchingUser
+                              ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Text('Verify'),
+                        ),
                       ),
                     ),
                   ],
