@@ -53,20 +53,25 @@ class _CreateLoanPageState extends ConsumerState<CreateLoanPage> {
   Future<void> _lookupBeneficiaryByEmail() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() {
-        _matchedBeneficiary = null;
-        _userLookupError = 'Please enter a registered beneficiary email.';
-      });
+      if (mounted) {
+        setState(() {
+          _matchedBeneficiary = null;
+          _userLookupError = 'Please enter a registered beneficiary email.';
+        });
+      }
       return;
     }
 
-    setState(() {
-      _isSearchingUser = true;
-      _userLookupError = null;
-    });
+    if (mounted) {
+      setState(() {
+        _isSearchingUser = true;
+        _userLookupError = null;
+      });
+    }
 
     try {
       final user = await UserRemoteDataSource().getUserByEmail(email);
+      if (!mounted) return;
       if (user != null) {
         setState(() {
           _matchedBeneficiary = user;
@@ -79,10 +84,12 @@ class _CreateLoanPageState extends ConsumerState<CreateLoanPage> {
         });
       }
     } catch (e) {
-      setState(() {
-        _matchedBeneficiary = null;
-        _userLookupError = 'Error checking user registration: $e';
-      });
+      if (mounted) {
+        setState(() {
+          _matchedBeneficiary = null;
+          _userLookupError = 'Error checking user registration: $e';
+        });
+      }
     } finally {
       if (mounted) setState(() => _isSearchingUser = false);
     }
@@ -91,7 +98,10 @@ class _CreateLoanPageState extends ConsumerState<CreateLoanPage> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    if (_matchedBeneficiary == null) {
+    final currentEmail = _emailController.text.trim().toLowerCase();
+    final matchedEmail = _matchedBeneficiary?.email.trim().toLowerCase();
+
+    if (_matchedBeneficiary == null || currentEmail != matchedEmail) {
       await _lookupBeneficiaryByEmail();
       if (!mounted) return;
       if (_matchedBeneficiary == null) {
