@@ -102,12 +102,23 @@ class _LoanQrDialogState extends State<LoanQrDialog> {
   Widget build(BuildContext context) {
     final loanNumber = widget.loan.loanAccountNumber ?? widget.loan.loanId;
     final tokenString = _currentToken?.tokenId ?? 'LL-TOKEN-PENDING';
+    final mediaQuery = MediaQuery.of(context);
+    final dialogWidth = mediaQuery.size.width > 550 ? 480.0 : mediaQuery.size.width * 0.9;
 
     return Dialog(
+      backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+      clipBehavior: Clip.antiAlias,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: SizedBox(
+        width: dialogWidth,
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            top: 24,
+            left: 24,
+            right: 24,
+            bottom: mediaQuery.viewInsets.bottom + 24,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
