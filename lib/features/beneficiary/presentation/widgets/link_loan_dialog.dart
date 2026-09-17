@@ -225,6 +225,7 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+    final dialogWidth = mediaQuery.size.width > 550 ? 500.0 : mediaQuery.size.width * 0.9;
     final maxHeight = mediaQuery.size.height * 0.85;
 
     return Dialog(
@@ -232,11 +233,8 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: maxHeight,
-          maxWidth: 500,
-        ),
+      child: SizedBox(
+        width: dialogWidth,
         child: SingleChildScrollView(
           padding: EdgeInsets.only(
             top: 20,
