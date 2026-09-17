@@ -234,12 +234,15 @@ class _CreateLoanPageState extends ConsumerState<CreateLoanPage> {
                     const SizedBox(width: 8),
                     Padding(
                       padding: const EdgeInsets.only(top: 4.0),
-                      child: OutlinedButton.icon(
-                        onPressed: _isSearchingUser ? null : _lookupBeneficiaryByEmail,
-                        icon: _isSearchingUser
-                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.person_search_rounded),
-                        label: const Text('Verify'),
+                      child: SizedBox(
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          onPressed: _isSearchingUser ? null : _lookupBeneficiaryByEmail,
+                          icon: _isSearchingUser
+                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                              : const Icon(Icons.person_search_rounded),
+                          label: const Text('Verify'),
+                        ),
                       ),
                     ),
                   ],
