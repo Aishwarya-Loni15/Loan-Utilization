@@ -178,7 +178,7 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
         loanAccountNumber: candidateLoan.loanAccountNumber ?? candidateLoan.loanId,
         beneficiaryId: user.uid,
         bankId: candidateLoan.bankId,
-        bankManagerId: candidateLoan.bankManagerId.isEmpty ? 'user_bank_sbi' : candidateLoan.bankManagerId,
+        bankManagerId: (candidateLoan.bankManagerId ?? '').isEmpty ? 'user_bank_sbi' : candidateLoan.bankManagerId!,
         schemeName: candidateLoan.schemeName,
         purpose: candidateLoan.purpose,
         category: candidateLoan.category,
