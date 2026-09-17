@@ -94,21 +94,26 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
   Future<void> _lookupBeneficiaryByEmail() async {
     final email = _emailController.text.trim();
     if (email.isEmpty) {
-      setState(() {
-        _matchedUid = null;
-        _matchedUser = null;
-        _userLookupError = 'Enter a registered beneficiary email.';
-      });
+      if (mounted) {
+        setState(() {
+          _matchedUid = null;
+          _matchedUser = null;
+          _userLookupError = 'Enter a registered beneficiary email.';
+        });
+      }
       return;
     }
 
-    setState(() {
-      _isSearchingUser = true;
-      _userLookupError = null;
-    });
+    if (mounted) {
+      setState(() {
+        _isSearchingUser = true;
+        _userLookupError = null;
+      });
+    }
 
     try {
       final user = await UserRemoteDataSource().getUserByEmail(email);
+      if (!mounted) return;
       if (user != null) {
         setState(() {
           _matchedUid = user.uid;
@@ -129,11 +134,13 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
         });
       }
     } catch (e) {
-      setState(() {
-        _matchedUid = null;
-        _matchedUser = null;
-        _userLookupError = 'Verification error: $e';
-      });
+      if (mounted) {
+        setState(() {
+          _matchedUid = null;
+          _matchedUser = null;
+          _userLookupError = 'Verification error: $e';
+        });
+      }
     } finally {
       if (mounted) setState(() => _isSearchingUser = false);
     }
@@ -146,7 +153,7 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() => _disbursementDate = picked);
     }
   }
@@ -154,7 +161,10 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
   Future<void> _submit() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    if (_matchedUid == null) {
+    final currentEmail = _emailController.text.trim().toLowerCase();
+    final matchedEmail = _matchedUser?.email.trim().toLowerCase();
+
+    if (_matchedUid == null || currentEmail != matchedEmail) {
       await _lookupBeneficiaryByEmail();
       if (!mounted) return;
       if (_matchedUid == null) {
