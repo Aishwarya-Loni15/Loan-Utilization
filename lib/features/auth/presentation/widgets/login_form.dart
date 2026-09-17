@@ -115,7 +115,7 @@ class _LoginFormState extends State<LoginForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
+                Row(
                   children: [
                     Icon(Icons.key_outlined, size: 16, color: AppColors.primaryViolet),
                     SizedBox(width: 6),
@@ -124,7 +124,7 @@ class _LoginFormState extends State<LoginForm> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryDark,
+                        color: AppColors.darkText,
                       ),
                     ),
                   ],
@@ -162,7 +162,7 @@ class _LoginFormState extends State<LoginForm> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: AppColors.primaryViolet.withOpacity(0.3)),
+          border: Border.all(color: AppColors.primaryViolet.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -174,7 +174,7 @@ class _LoginFormState extends State<LoginForm> {
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primaryDark,
+                color: AppColors.darkText,
               ),
             ),
           ],
