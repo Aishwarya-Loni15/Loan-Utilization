@@ -313,9 +313,11 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
                         ],
                       ),
                       const SizedBox(height: 6),
-                      const Text(
-                        'Directly connect your registered bank loan account to your profile with one tap.',
-                        style: TextStyle(fontSize: 11, color: AppColors.secondaryText),
+                      Text(
+                        _foundLoan != null
+                            ? 'Matched Loan Account: ${_foundLoan!.loanAccountNumber ?? _foundLoan!.loanId} (${_foundLoan!.schemeName})'
+                            : 'Directly connect your registered bank loan account to your profile with one tap.',
+                        style: const TextStyle(fontSize: 11, color: AppColors.secondaryText, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 10),
                       SizedBox(
@@ -325,7 +327,9 @@ class _LinkLoanDialogState extends ConsumerState<LinkLoanDialog> {
                           icon: _isLoading
                               ? const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
                               : const Icon(Icons.link_rounded, size: 18),
-                          label: const Text('Direct Link Loan to My Account'),
+                          label: Text(_foundLoan != null
+                              ? 'Link Account "${_foundLoan!.loanAccountNumber ?? _foundLoan!.loanId}" Directly'
+                              : 'Direct Link Loan to My Account'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primaryViolet,
                             foregroundColor: Colors.white,
