@@ -24,11 +24,7 @@ class LinkOfflineLoanDialog extends ConsumerStatefulWidget {
     return showDialog<void>(
       context: context,
       barrierDismissible: true,
-      builder: (context) => Dialog(
-        insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-        backgroundColor: Colors.transparent,
-        child: LinkOfflineLoanDialog(initialEmail: initialEmail),
-      ),
+      builder: (context) => LinkOfflineLoanDialog(initialEmail: initialEmail),
     );
   }
 
@@ -258,30 +254,26 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.90,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black26,
-            blurRadius: 20,
-            spreadRadius: 4,
-          ),
-        ],
-      ),
-      padding: EdgeInsets.only(
-        top: 20,
-        left: 20,
-        right: 20,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 20,
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
+    final mediaQuery = MediaQuery.of(context);
+    final maxHeight = mediaQuery.size.height * 0.90;
+
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      clipBehavior: Clip.antiAlias,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: maxHeight,
+          maxWidth: 500,
+        ),
         child: SingleChildScrollView(
+          padding: EdgeInsets.only(
+            top: 20,
+            left: 20,
+            right: 20,
+            bottom: mediaQuery.viewInsets.bottom + 20,
+          ),
           child: Form(
             key: _formKey,
             child: Column(
