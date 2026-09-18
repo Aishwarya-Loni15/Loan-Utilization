@@ -224,6 +224,9 @@ class AuthRepositoryImpl implements AuthRepository {
             await storage.setBool('is_user_logged_in', true);
           }
           await storage.setString('logged_in_user_uid', user.uid);
+          if (user.role == UserRole.beneficiary) {
+            await _autoLinkLoansForUser(user);
+          }
           return user;
         }
       }
@@ -246,6 +249,9 @@ class AuthRepositoryImpl implements AuthRepository {
               await storage.setBool('is_user_logged_in', true);
             }
             await storage.setString('logged_in_user_uid', user.uid);
+            if (user.role == UserRole.beneficiary) {
+              await _autoLinkLoansForUser(user);
+            }
             return user;
           }
         } catch (e) {
@@ -268,6 +274,57 @@ class AuthRepositoryImpl implements AuthRepository {
       if (e is Failure) rethrow;
       throw FirebaseExceptionHandler.handleException(e);
     }
+  }
+
+  Future<void> _autoLinkLoansForUser(UserEntity user) async {
+    try {
+      final loanRemoteDataSource = LoanRemoteDataSource();
+      final allLoans = await loanRemoteDataSource.getLoans();
+      final cleanEmail = user.email.trim().toLowerCase();
+      final cleanPhone = user.phone.trim();
+
+      for (final loan in allLoans) {
+        final benEmail = (loan.beneficiaryEmail ?? '').trim().toLowerCase();
+        final benMobile = (loan.beneficiaryMobile ?? '').trim();
+        final isEmailMatch = cleanEmail.isNotEmpty && benEmail == cleanEmail;
+        final isPhoneMatch = cleanPhone.isNotEmpty && benMobile == cleanPhone;
+
+        if (isEmailMatch || isPhoneMatch) {
+          if (loan.beneficiaryId != user.uid || !loan.isLinked || loan.beneficiaryEmail != cleanEmail) {
+            final updatedLoan = LoanModel(
+              loanId: loan.loanId,
+              loanAccountNumber: loan.loanAccountNumber,
+              beneficiaryId: user.uid,
+              bankId: loan.bankId,
+              bankManagerId: loan.bankManagerId,
+              schemeName: loan.schemeName,
+              purpose: loan.purpose,
+              category: loan.category,
+              sanctionedAmount: loan.sanctionedAmount,
+              disbursedAmount: loan.disbursedAmount,
+              utilizedAmount: loan.utilizedAmount,
+              remainingAmount: loan.remainingAmount,
+              utilizationPercentage: loan.utilizationPercentage,
+              disbursementDate: loan.disbursementDate,
+              expectedUtilizationDate: loan.expectedUtilizationDate,
+              status: loan.status,
+              createdAt: loan.createdAt,
+              updatedAt: DateTime.now(),
+              beneficiaryName: user.name,
+              beneficiaryMobile: user.phone,
+              beneficiaryEmail: user.email,
+              bankName: loan.bankName,
+              branchName: loan.branchName,
+              district: user.district.isNotEmpty ? user.district : loan.district,
+              taluka: user.taluka.isNotEmpty ? user.taluka : loan.taluka,
+              village: user.village.isNotEmpty ? user.village : loan.village,
+              isLinked: true,
+            );
+            await loanRemoteDataSource.updateLoan(updatedLoan);
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   @override
@@ -326,7 +383,17 @@ class AuthRepositoryImpl implements AuthRepository {
       );
 
       await _userRemoteDataSource.createUser(userModel);
+
+      if (role == UserRole.beneficiary) {
+        await _autoLinkLoansForUser(userModel);
+      }
+
       return userModel;
+    } catch (e) {
+      if (e is Failure) rethrow;
+      throw FirebaseExceptionHandler.handleException(e);
+    }
+  }
     } catch (e) {
       if (e is Failure) rethrow;
       throw FirebaseExceptionHandler.handleException(e);
