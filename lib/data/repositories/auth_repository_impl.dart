@@ -7,7 +7,9 @@ import '../../domain/repositories/auth_repository.dart';
 import '../datasources/mock_database_service.dart';
 import '../datasources/remote/auth_remote_datasource.dart';
 import '../datasources/remote/user_remote_datasource.dart';
+import '../datasources/remote/loan_remote_datasource.dart';
 import '../models/user_model.dart';
+import '../models/loan_model.dart';
 import '../../core/services/local_storage_service.dart';
 import '../../core/utils/validators.dart';
 
