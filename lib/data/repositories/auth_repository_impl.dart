@@ -394,11 +394,6 @@ class AuthRepositoryImpl implements AuthRepository {
       throw FirebaseExceptionHandler.handleException(e);
     }
   }
-    } catch (e) {
-      if (e is Failure) rethrow;
-      throw FirebaseExceptionHandler.handleException(e);
-    }
-  }
 
   @override
   Future<void> logout() async {
