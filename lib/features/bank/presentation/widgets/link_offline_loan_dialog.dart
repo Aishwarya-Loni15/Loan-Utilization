@@ -14,6 +14,7 @@ import '../../../../data/models/loan_model.dart';
 import '../../../../data/models/user_model.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../loans/providers/loan_provider.dart';
+import '../../../beneficiary/providers/beneficiary_provider.dart';
 import '../../providers/bank_provider.dart';
 
 class LinkOfflineLoanDialog extends ConsumerStatefulWidget {
@@ -271,6 +272,7 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
       ref.invalidate(bankLoansProvider);
       ref.invalidate(userLoansProvider);
       ref.invalidate(bankDashboardMetricsProvider);
+      ref.invalidate(beneficiaryMetricsProvider);
 
       if (mounted) {
         Navigator.pop(context);
