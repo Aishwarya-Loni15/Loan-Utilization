@@ -59,7 +59,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 1,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          minimumSize: const Size(double.infinity, 50),
+          minimumSize: const Size(64, 44),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -75,7 +75,7 @@ class AppTheme {
           foregroundColor: AppColors.primaryViolet,
           side: const BorderSide(color: AppColors.primaryViolet, width: 1.5),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          minimumSize: const Size(double.infinity, 50),
+          minimumSize: const Size(64, 44),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
