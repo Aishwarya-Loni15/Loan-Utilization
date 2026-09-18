@@ -641,6 +641,10 @@ class _LinkOfflineLoanDialogState extends ConsumerState<LinkOfflineLoanDialog> {
                     ),
                     OutlinedButton.icon(
                       onPressed: _selectDisbursementDate,
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      ),
                       icon: const Icon(Icons.calendar_today_rounded, size: 16),
                       label: const Text('Change Date'),
                     ),
