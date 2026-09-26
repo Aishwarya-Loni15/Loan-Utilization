@@ -299,18 +299,19 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
         }
 
         if (_docFile != null && detectedReceiptAmt != null && amount > detectedReceiptAmt) {
+          amount = detectedReceiptAmt;
+          _amountController.text = detectedReceiptAmt.toStringAsFixed(0);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  '❌ Cannot Submit: Spent amount (₹${amount.toStringAsFixed(0)}) is MORE than the amount specified on receipt proof (₹${detectedReceiptAmt.toStringAsFixed(0)})! Only the right receipt amount can be taken.',
+                  'ℹ️ Receipt Amount Auto-Capped: Claimed amount adjusted to ₹${detectedReceiptAmt.toStringAsFixed(0)} (Exact amount on receipt).',
                 ),
-                backgroundColor: AppColors.danger,
-                duration: const Duration(seconds: 5),
+                backgroundColor: AppColors.primary,
+                duration: const Duration(seconds: 4),
               ),
             );
           }
-          return;
         }
 
         final isOnline = ConnectivityService().isOnline && OfflineSyncService().isOnline;
