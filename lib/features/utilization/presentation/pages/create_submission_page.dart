@@ -111,12 +111,19 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
       );
 
       if (pickedFile != null) {
-        // Copy captured image to permanent Application Documents Directory so it persists after USB disconnection
+        final originalPath = pickedFile.path;
+        final isGalleryUpload = source == ImageSource.gallery;
+        final originalName = originalPath.split(RegExp(r'[\/\\]')).last.toLowerCase();
+
+        final isOriginalAi = isGalleryUpload ||
+            AiVerificationEngine.isAiGeneratedPhoto(originalPath, _descriptionController.text.trim()) ||
+            AiVerificationEngine.isFakePhoto(originalPath, _descriptionController.text.trim());
+
         File photo = File(pickedFile.path);
         try {
           final appDir = await getApplicationDocumentsDirectory();
-          final fileName =
-              'geotag_proof_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          final prefix = isOriginalAi ? 'ai_gallery_fake_' : 'geotag_proof_';
+          final fileName = '$prefix${DateTime.now().millisecondsSinceEpoch}_$originalName';
           final permanentPath = '${appDir.path}/$fileName';
           photo = await File(pickedFile.path).copy(permanentPath);
         } catch (_) {
@@ -151,17 +158,31 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
 
         if (mounted) {
           final isOffline = locData.isOfflineCaptured;
-          final sourceDesc = photoGeotag.isFromExif
-              ? 'Photo EXIF Tag'
-              : (isOffline ? 'Offline Mobile Satellite GPS' : 'Live Photo Capture');
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '📸 Photo Attached! Geotag ($sourceDesc): ${liveAddr.villageName}, ${liveAddr.areaName} (${photoGeotag.latitude.toStringAsFixed(4)}°, ${photoGeotag.longitude.toStringAsFixed(4)}°) locked for Bank Manager.',
+          final isAiGen = isOriginalAi || AiVerificationEngine.isAiGeneratedPhoto(photo.path, _descriptionController.text.trim());
+
+          if (isAiGen) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  '🤖 100% AI-GENERATED FAKE IMAGE DETECTED! Uploaded image is synthetic/fake illustration & FLAGGED AS FAKE for Bank Manager & Officer.',
+                ),
+                backgroundColor: AppColors.danger,
+                duration: Duration(seconds: 5),
               ),
-              backgroundColor: isOffline ? Colors.orange.shade800 : AppColors.success,
-            ),
-          );
+            );
+          } else {
+            final sourceDesc = photoGeotag.isFromExif
+                ? 'Photo EXIF Tag'
+                : (isOffline ? 'Offline Mobile Satellite GPS' : 'Live Photo Capture');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  '📸 Photo Attached! Geotag ($sourceDesc): ${liveAddr.villageName}, ${liveAddr.areaName} (${photoGeotag.latitude.toStringAsFixed(4)}°, ${photoGeotag.longitude.toStringAsFixed(4)}°) locked for Bank Manager.',
+                ),
+                backgroundColor: isOffline ? Colors.orange.shade800 : AppColors.success,
+              ),
+            );
+          }
         }
       }
     } catch (e) {
