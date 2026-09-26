@@ -648,8 +648,8 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
                     if (val > remainingBal) {
                       return 'Spent amount cannot be greater than remaining loan amount (₹${remainingBal.toStringAsFixed(0)})!';
                     }
-                    if (detectedReceiptAmt != null && val > detectedReceiptAmt) {
-                      return '❌ EXCESS AMOUNT: Spent amount (₹${val.toStringAsFixed(0)}) exceeds receipt proof amount (₹${detectedReceiptAmt.toStringAsFixed(0)})!';
+                    if (_docFile != null && detectedReceiptAmt != null && val > detectedReceiptAmt) {
+                      return '⚠️ Excess amount entered! Only the exact receipt value (₹${detectedReceiptAmt.toStringAsFixed(0)}) will be taken on submit.';
                     }
                     return null;
                   },
