@@ -28,7 +28,7 @@ class Validators {
     }
     final hasSpecialChar = RegExp(r'[^a-zA-Z0-9\s]').hasMatch(value);
     if (!hasSpecialChar) {
-      return 'Password must contain at least one special character (!@#$%^&*)';
+      return 'Password must contain at least one special character (!@#\$%^&*)';
     }
     return null;
   }
