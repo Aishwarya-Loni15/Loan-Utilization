@@ -421,6 +421,7 @@ class _ReviewSubmissionPageState extends ConsumerState<ReviewSubmissionPage> {
                       documentUrls: sub.documentUrls,
                       latitude: sub.latitude,
                       longitude: sub.longitude,
+                      description: sub.description,
                     );
 
                     final isAiGen = aiResult.isAiGenerated;
@@ -453,8 +454,8 @@ class _ReviewSubmissionPageState extends ConsumerState<ReviewSubmissionPage> {
                                   children: [
                                     Text(
                                       isAiGen
-                                          ? '🤖 Image: FAKE (AI Gen)'
-                                          : (isImageReal ? '🖼️ Image: REAL' : '🖼️ Image: FAKE'),
+                                          ? '🤖 100% AI DETECTED (FAKE)'
+                                          : (isImageReal ? '🖼️ Image: REAL' : '⚠️ 100% FAKE DETECTED'),
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
