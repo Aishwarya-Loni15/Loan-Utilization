@@ -144,14 +144,9 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
           isOfflineCaptured: liveAddr.isOffline || !ConnectivityService().isOnline,
         );
 
-        final detectedAmt = AiVerificationEngine().extractReceiptAmount(photo.path, 150000.0);
-
         setState(() {
           _photoFile = photo;
           _locationData = locData;
-          if (_amountController.text.trim().isEmpty || (double.tryParse(_amountController.text.trim()) ?? 0.0) == 0.0) {
-            _amountController.text = detectedAmt.toStringAsFixed(0);
-          }
         });
 
         if (mounted) {
