@@ -112,17 +112,15 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
 
       if (pickedFile != null) {
         final originalPath = pickedFile.path;
-        final isGalleryUpload = source == ImageSource.gallery;
         final originalName = originalPath.split(RegExp(r'[\/\\]')).last.toLowerCase();
 
-        final isOriginalAi = isGalleryUpload ||
-            AiVerificationEngine.isAiGeneratedPhoto(originalPath, _descriptionController.text.trim()) ||
+        final isOriginalAi = AiVerificationEngine.isAiGeneratedPhoto(originalPath, _descriptionController.text.trim()) ||
             AiVerificationEngine.isFakePhoto(originalPath, _descriptionController.text.trim());
 
         File photo = File(pickedFile.path);
         try {
           final appDir = await getApplicationDocumentsDirectory();
-          final prefix = isOriginalAi ? 'ai_gallery_fake_' : 'geotag_proof_';
+          final prefix = isOriginalAi ? 'ai_fake_proof_' : 'geotag_proof_';
           final fileName = '$prefix${DateTime.now().millisecondsSinceEpoch}_$originalName';
           final permanentPath = '${appDir.path}/$fileName';
           photo = await File(pickedFile.path).copy(permanentPath);
