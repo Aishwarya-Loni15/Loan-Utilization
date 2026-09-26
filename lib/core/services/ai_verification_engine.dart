@@ -339,10 +339,12 @@ class AiVerificationEngine implements IAiVerificationEngine {
     }
 
     final explanation = (imageAuthStatus == 'AI_GENERATED_FAKE')
-        ? 'ALERT: AI-GENERATED FAKE IMAGE DETECTED ($finalScore% confidence)! Uploaded photo is synthetic/deepfake. FLAGGED FOR BANK MANAGER AUDIT.'
-        : ((imageAuthStatus == 'FAKE_OR_TAMPERED' || geotagAuthStatus == 'FAKE_OR_SPOOFED' || aiStatus == 'PURPOSE_MISMATCH')
-            ? 'ALERT: Fraud / Authenticity Issues Flagged ($finalScore% confidence)! Image status: $imageAuthStatus, Geotag status: $geotagAuthStatus. FLAGGED FOR BANK MANAGER AUDIT.'
-            : 'AI Audit Complete: High trust score verified ($finalScore% confidence). Image authenticity is REAL and Geotag location is REAL.');
+        ? 'ALERT: 100% AI-GENERATED FAKE IMAGE DETECTED ($finalScore% confidence)! Uploaded photo is synthetic/deepfake. FLAGGED FOR BANK MANAGER AUDIT.'
+        : (imageAuthStatus == 'FAKE_OR_TAMPERED'
+            ? 'ALERT: 100% FAKE / TAMPERED IMAGE DETECTED ($finalScore% confidence)! Digital manipulation or mismatch detected. FLAGGED FOR BANK MANAGER AUDIT.'
+            : (geotagAuthStatus == 'FAKE_OR_SPOOFED'
+                ? 'GEOTAG ALERT: GPS coordinates missing or unverified ($finalScore% confidence), but Image Authenticity is REAL.'
+                : 'AI Audit Complete: High trust score verified ($finalScore% confidence). Image authenticity is REAL.'));
 
     final model = AiAnalysisModel(
       analysisId: 'ai_engine_${now.millisecondsSinceEpoch}',
