@@ -419,7 +419,7 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
     final totalDisbursed = linkedLoan?.disbursedAmount ?? 200000.0;
     final remainingBal = linkedLoan?.remainingAmount ?? 15000.0;
 
-    final activeProofPath = _docFile?.path ?? _photoFile?.path ?? '';
+    final activeReceiptPath = _docFile?.path ?? '';
     final activePhotoPath = _photoFile?.path ?? '';
     final activeDesc = _descriptionController.text.trim();
     final isAiGeneratedImage = (activePhotoPath.isNotEmpty && AiVerificationEngine.isAiGeneratedPhoto(activePhotoPath, activeDesc)) ||
@@ -428,13 +428,13 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
         (_docFile != null && AiVerificationEngine.isFakePhoto(_docFile!.path, activeDesc)) ||
         activeDesc.toLowerCase().contains('fake');
 
-    final detectedReceiptAmt = activeProofPath.isNotEmpty
-        ? AiVerificationEngine().extractReceiptAmount(activeProofPath, 150000.0)
+    final detectedReceiptAmt = activeReceiptPath.isNotEmpty
+        ? AiVerificationEngine().extractReceiptAmount(activeReceiptPath, 150000.0)
         : null;
 
     final enteredAmount = double.tryParse(_amountController.text.trim()) ?? 0.0;
     final isExcessOfRemaining = enteredAmount > remainingBal;
-    final isExcessOfReceipt = detectedReceiptAmt != null && enteredAmount > detectedReceiptAmt;
+    final isExcessOfReceipt = _docFile != null && detectedReceiptAmt != null && enteredAmount > detectedReceiptAmt;
     final isFakeOrWrongAmount = isExcessOfReceipt || isFakeImage || isAiGeneratedImage;
 
     return Scaffold(
