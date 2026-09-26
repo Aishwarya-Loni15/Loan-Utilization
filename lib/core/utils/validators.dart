@@ -1,3 +1,4 @@
+class Validators {
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Email is required';
@@ -25,7 +26,7 @@
     if (!hasLowercase) {
       return 'Password must contain at least one small letter (a-z)';
     }
-    final hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>\_\-\+\=\/\\]').hasMatch(value);
+    final hasSpecialChar = RegExp(r'[^a-zA-Z0-9\s]').hasMatch(value);
     if (!hasSpecialChar) {
       return 'Password must contain at least one special character (!@#$%^&*)';
     }
