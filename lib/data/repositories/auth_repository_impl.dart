@@ -299,7 +299,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (dbUser != null) {
         if (dbUser.role == UserRole.admin) {
           await storage.setBool('is_admin_logged_in', true);
-          await storage.setBool('is_admin_logged_in', false);
+          await storage.setBool('is_user_logged_in', false);
         } else {
           await storage.setBool('is_user_logged_in', true);
           await storage.setBool('is_admin_logged_in', false);
