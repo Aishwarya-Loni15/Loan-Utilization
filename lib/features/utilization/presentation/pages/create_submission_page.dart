@@ -266,7 +266,7 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
           _uploadStatusText = 'Uploading invoice document & geotag metadata...';
         });
 
-        final amount = double.parse(_amountController.text.trim());
+        double amount = double.parse(_amountController.text.trim());
         final now = DateTime.now();
         final subId = 'sub_${now.millisecondsSinceEpoch}';
 
