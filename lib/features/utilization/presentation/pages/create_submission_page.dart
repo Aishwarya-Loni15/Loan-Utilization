@@ -320,6 +320,18 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
 
         final isOnline = ConnectivityService().isOnline && OfflineSyncService().isOnline;
 
+        final aiResult = AiVerificationEngine().analyzeSubmission(
+          submissionId: subId,
+          loanPurpose: linkedLoan?.purpose ?? 'Agricultural Machinery',
+          amountClaimed: amount,
+          photoUrls: [_photoFile!.path],
+          videoUrls: _videoFile != null ? [_videoFile!.path] : [],
+          documentUrls: _docFile != null ? [_docFile!.path] : [],
+          latitude: _locationData!.latitude,
+          longitude: _locationData!.longitude,
+          description: _descriptionController.text.trim(),
+        );
+
         final submittedEntity = await ref
             .read(submitEvidenceNotifierProvider.notifier)
             .submit(
@@ -332,8 +344,8 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
               latitude: _locationData!.latitude,
               longitude: _locationData!.longitude,
               accuracy: _locationData!.accuracy,
-              aiScore: 0.0,
-              aiAnalysis: null,
+              aiScore: aiResult.confidenceScore,
+              aiAnalysis: aiResult.analysisModel,
             );
 
         if (!isOnline) {

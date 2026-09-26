@@ -77,6 +77,20 @@ class SubmitEvidenceNotifier extends StateNotifier<AsyncValue<void>> {
       final repo = _ref.read(utilizationRepositoryProvider);
 
       final subId = 'sub_${DateTime.now().millisecondsSinceEpoch}';
+
+      final evaluatedResult = AiVerificationEngine().analyzeSubmission(
+        submissionId: subId,
+        loanPurpose: 'Agricultural Machinery',
+        amountClaimed: amountSpent,
+        photoUrls: photoUrls,
+        videoUrls: videoUrls,
+        documentUrls: documentUrls,
+        latitude: latitude,
+        longitude: longitude,
+        description: description,
+      );
+      final finalAnalysis = aiAnalysis ?? evaluatedResult.analysisModel;
+
       final submission = UtilizationSubmissionModel(
         submissionId: subId,
         loanId: loanId,
@@ -92,27 +106,13 @@ class SubmitEvidenceNotifier extends StateNotifier<AsyncValue<void>> {
         capturedAt: DateTime.now(),
         uploadedAt: DateTime.now(),
         status: SubmissionStatus.underReview,
-        aiScore: aiScore,
-        riskLevel: aiAnalysis?.riskLevel ?? RiskLevel.low,
+        aiScore: finalAnalysis.aiScore,
+        riskLevel: finalAnalysis.riskLevel,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
 
-      final result = await repo.submitEvidence(submission, aiAnalysis ?? AiAnalysisModel(
-        analysisId: 'ai_pending_$subId',
-        submissionId: subId,
-        aiScore: 0.0,
-        riskLevel: RiskLevel.low,
-        purposeMatchScore: 0.0,
-        invoiceMatchScore: 0.0,
-        imageMatchScore: 0.0,
-        locationScore: 0.0,
-        duplicateScore: 0.0,
-        detectedObjects: ['Geotagged Photo Evidence'],
-        detectedText: 'Submitted for Bank Manager Verification',
-        reasons: ['Evidence submitted by beneficiary. Awaiting Bank Manager verification.'],
-        analyzedAt: DateTime.now(),
-      ));
+      final result = await repo.submitEvidence(submission, finalAnalysis);
       
       // Dispatch real-time notification directly to Bank Manager
       _ref.read(notificationsProvider.notifier).addNotification(
