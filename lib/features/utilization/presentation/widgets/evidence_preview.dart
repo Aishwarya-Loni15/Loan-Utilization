@@ -130,7 +130,7 @@ class EvidencePreviewWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
-                          '🤖 AI GENERATED - FAKE',
+                          '🤖 100% AI DETECTED - FAKE',
                           style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -143,7 +143,7 @@ class EvidencePreviewWidget extends StatelessWidget {
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: const Text(
-                          '⚠️ FAKE IMAGE',
+                          '⚠️ 100% FAKE IMAGE DETECTED',
                           style: TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold),
                         ),
                       ),

@@ -386,8 +386,8 @@ class SubmissionDetailsPage extends ConsumerWidget {
                               const SizedBox(width: 6),
                               Text(
                                 isAiGeneratedImage
-                                    ? '🤖 AI GENERATED IMAGE (FAKE)'
-                                    : (isFakeImage ? '⚠️ FAKE IMAGE' : '✅ REAL IMAGE'),
+                                    ? '🤖 100% AI DETECTED (FAKE)'
+                                    : (isFakeImage ? '⚠️ 100% FAKE IMAGE DETECTED' : '✅ REAL IMAGE'),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,
