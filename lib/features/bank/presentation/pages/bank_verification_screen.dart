@@ -674,8 +674,8 @@ class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen>
                                             const SizedBox(width: 6),
                                             Text(
                                               isAiGen
-                                                  ? '🤖 AI GENERATED IMAGE (FAKE)'
-                                                  : (isFake ? '⚠️ FAKE IMAGE' : '✅ REAL IMAGE'),
+                                                  ? '🤖 100% AI DETECTED (FAKE)'
+                                                  : (isFake ? '⚠️ 100% FAKE IMAGE DETECTED' : '✅ REAL IMAGE'),
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontWeight: FontWeight.bold,
@@ -689,134 +689,134 @@ class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen>
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                              ],
-                            );
-                          },
-                        ),
-                      ] else ...[
+                              ];
+                            },
+                          ),
+                        ] else ...[
+                          ListTile(
+                            leading: const Icon(Icons.camera_alt_outlined),
+                            title: const Text('Geotag Photo Artifact'),
+                            subtitle: const Text('No photo uploaded'),
+                          ),
+                        ],
                         ListTile(
-                          leading: const Icon(Icons.camera_alt_outlined),
-                          title: const Text('Geotag Photo Artifact'),
-                          subtitle: const Text('No photo uploaded'),
+                          leading: const Icon(Icons.videocam_outlined),
+                          title: const Text('Site Video Recording'),
+                          subtitle: Text(sub.videoUrls.isNotEmpty ? sub.videoUrls.first.split('/').last : 'No video attached'),
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.receipt_long_outlined),
+                          title: const Text('Invoice Document / Voucher'),
+                          subtitle: Text(sub.documentUrls.isNotEmpty ? sub.documentUrls.first.split('/').last : 'No invoice attached'),
                         ),
                       ],
-                      ListTile(
-                        leading: const Icon(Icons.videocam_outlined),
-                        title: const Text('Site Video Recording'),
-                        subtitle: Text(sub.videoUrls.isNotEmpty ? sub.videoUrls.first.split('/').last : 'No video attached'),
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.receipt_long_outlined),
-                        title: const Text('Invoice Document / Voucher'),
-                        subtitle: Text(sub.documentUrls.isNotEmpty ? sub.documentUrls.first.split('/').last : 'No invoice attached'),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 14),
+                  const SizedBox(height: 14),
 
-                // 6, 7 & 8. Bank Manager AI Authenticity & Fraud Verification Suite
-                aiAsync.when(
-                  data: (ai) {
-                    final aiResult = AiVerificationEngine().analyzeSubmission(
-                      submissionId: sub.submissionId,
-                      loanPurpose: loan?.purpose ?? 'Agricultural Machinery',
-                      amountClaimed: sub.amountSpent,
-                      photoUrls: sub.photoUrls,
-                      videoUrls: sub.videoUrls,
-                      documentUrls: sub.documentUrls,
-                      latitude: sub.latitude,
-                      longitude: sub.longitude,
-                    );
+                  // 6, 7 & 8. Bank Manager AI Authenticity & Fraud Verification Suite
+                  aiAsync.when(
+                    data: (ai) {
+                      final aiResult = AiVerificationEngine().analyzeSubmission(
+                        submissionId: sub.submissionId,
+                        loanPurpose: loan?.purpose ?? 'Agricultural Machinery',
+                        amountClaimed: sub.amountSpent,
+                        photoUrls: sub.photoUrls,
+                        videoUrls: sub.videoUrls,
+                        documentUrls: sub.documentUrls,
+                        latitude: sub.latitude,
+                        longitude: sub.longitude,
+                        description: sub.description,
+                      );
 
-                    final isAiGen = aiResult.isAiGenerated;
-                    final isImageReal = aiResult.isImageReal;
-                    final isGeotagReal = aiResult.isGeotagReal;
-                    final isMismatch = aiResult.aiStatus == 'PURPOSE_MISMATCH';
+                      final isAiGen = aiResult.isAiGenerated;
+                      final isImageReal = aiResult.isImageReal;
+                      final isGeotagReal = aiResult.isGeotagReal;
+                      final isMismatch = aiResult.aiStatus == 'PURPOSE_MISMATCH';
 
-                    return Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: (!isImageReal || !isGeotagReal || isMismatch)
-                              ? AppColors.danger
-                              : AppColors.primary.withValues(alpha: 0.5),
-                          width: 1.5,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: const [
-                              Icon(Icons.shield_outlined, color: AppColors.primary, size: 22),
-                              SizedBox(width: 8),
-                              Text(
-                                'Bank Manager AI Verification Suite',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              ),
-                            ],
+                      return Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColors.surface,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: (!isImageReal || !isGeotagReal || isMismatch)
+                                ? AppColors.danger
+                                : AppColors.primary.withValues(alpha: 0.5),
+                            width: 1.5,
                           ),
-                          const SizedBox(height: 12),
-
-                          // Image Authenticity Card (REAL vs FAKE vs AI GENERATED)
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: isAiGen
-                                  ? Colors.purple.shade50
-                                  : (isImageReal ? Colors.green.shade50 : Colors.red.shade50),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isAiGen
-                                    ? Colors.purple.shade300
-                                    : (isImageReal ? Colors.green.shade300 : Colors.red.shade300),
-                              ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: const [
+                                Icon(Icons.shield_outlined, color: AppColors.primary, size: 22),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Bank Manager AI Verification Suite',
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                ),
+                              ],
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          isAiGen
-                                              ? Icons.smart_toy_rounded
-                                              : (isImageReal ? Icons.verified_user_rounded : Icons.gpp_bad_rounded),
+                            const SizedBox(height: 12),
+
+                            // Image Authenticity Card (REAL vs FAKE vs AI GENERATED)
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isAiGen
+                                    ? Colors.purple.shade50
+                                    : (isImageReal ? Colors.green.shade50 : Colors.red.shade50),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isAiGen
+                                      ? Colors.purple.shade300
+                                      : (isImageReal ? Colors.green.shade300 : Colors.red.shade300),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            isAiGen
+                                                ? Icons.smart_toy_rounded
+                                                : (isImageReal ? Icons.verified_user_rounded : Icons.gpp_bad_rounded),
+                                            color: isAiGen
+                                                ? Colors.purple.shade800
+                                                : (isImageReal ? Colors.green.shade800 : Colors.red.shade800),
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text(
+                                            '🖼️ Image Authenticity',
+                                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                          ),
+                                        ],
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                        decoration: BoxDecoration(
                                           color: isAiGen
                                               ? Colors.purple.shade800
-                                              : (isImageReal ? Colors.green.shade800 : Colors.red.shade800),
-                                          size: 20,
+                                              : (isImageReal ? Colors.green.shade700 : Colors.red.shade700),
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
-                                        const SizedBox(width: 8),
-                                        const Text(
-                                          '🖼️ Image Authenticity',
-                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                        child: Text(
+                                          isAiGen
+                                              ? '100% AI DETECTED - FAKE'
+                                              : (isImageReal ? 'REAL IMAGE (${aiResult.imageAuthenticityScore.toStringAsFixed(0)}%)' : '100% FAKE DETECTED'),
+                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
                                         ),
-                                      ],
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: isAiGen
-                                            ? Colors.purple.shade800
-                                            : (isImageReal ? Colors.green.shade700 : Colors.red.shade700),
-                                        borderRadius: BorderRadius.circular(8),
                                       ),
-                                      child: Text(
-                                        isAiGen
-                                            ? 'AI GENERATED - FAKE (${aiResult.imageAuthenticityScore.toStringAsFixed(0)}%)'
-                                            : (isImageReal ? 'REAL IMAGE (${aiResult.imageAuthenticityScore.toStringAsFixed(0)}%)' : 'FAKE / TAMPERED'),
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                    ],
+                                  ),
                                 const SizedBox(height: 6),
                                 Text(
                                   aiResult.imageVerificationDetails,
