@@ -896,6 +896,7 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
                   photoFile: _photoFile,
                   videoFile: _videoFile,
                   documentFile: _docFile,
+                  description: activeDesc,
                   onRemovePhoto: () => setState(() => _photoFile = null),
                   onRemoveVideo: () => setState(() => _videoFile = null),
                   onRemoveDocument: () => setState(() => _docFile = null),
