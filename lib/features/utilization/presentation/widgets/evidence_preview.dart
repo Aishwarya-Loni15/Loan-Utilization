@@ -7,6 +7,7 @@ class EvidencePreviewWidget extends StatelessWidget {
   final File? photoFile;
   final File? videoFile;
   final File? documentFile;
+  final String? description;
   final VoidCallback? onRemovePhoto;
   final VoidCallback? onRemoveVideo;
   final VoidCallback? onRemoveDocument;
@@ -16,6 +17,7 @@ class EvidencePreviewWidget extends StatelessWidget {
     this.photoFile,
     this.videoFile,
     this.documentFile,
+    this.description,
     this.onRemovePhoto,
     this.onRemoveVideo,
     this.onRemoveDocument,
@@ -27,11 +29,12 @@ class EvidencePreviewWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    final isPhotoAiGen = photoFile != null && AiVerificationEngine.isAiGeneratedPhoto(photoFile!.path, '');
-    final isPhotoFake = photoFile != null && (isPhotoAiGen || AiVerificationEngine.isFakePhoto(photoFile!.path, ''));
+    final desc = description ?? '';
+    final isPhotoAiGen = photoFile != null && AiVerificationEngine.isAiGeneratedPhoto(photoFile!.path, desc);
+    final isPhotoFake = photoFile != null && (isPhotoAiGen || AiVerificationEngine.isFakePhoto(photoFile!.path, desc));
 
-    final isDocAiGen = documentFile != null && AiVerificationEngine.isAiGeneratedPhoto(documentFile!.path, '');
-    final isDocFake = documentFile != null && (isDocAiGen || AiVerificationEngine.isFakePhoto(documentFile!.path, ''));
+    final isDocAiGen = documentFile != null && AiVerificationEngine.isAiGeneratedPhoto(documentFile!.path, desc);
+    final isDocFake = documentFile != null && (isDocAiGen || AiVerificationEngine.isFakePhoto(documentFile!.path, desc));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
