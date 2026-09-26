@@ -162,8 +162,6 @@ class AiVerificationEngine implements IAiVerificationEngine {
         photoName.contains('curtain') ||
         photoName.contains('furniture') ||
         photoName.contains('house') ||
-        photoName.contains('image_picker') ||
-        photoName.contains('scaled_') ||
         cleanDesc.contains('window') ||
         cleanDesc.contains('wall') ||
         cleanDesc.contains('glass') ||
