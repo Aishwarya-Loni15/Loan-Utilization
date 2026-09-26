@@ -689,7 +689,8 @@ class _BankVerificationScreenState extends ConsumerState<BankVerificationScreen>
                                   ],
                                 ),
                                 const SizedBox(height: 12),
-                              ];
+                              ],
+                            );
                             },
                           ),
                         ] else ...[
