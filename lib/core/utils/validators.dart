@@ -1,11 +1,11 @@
-class Validators {
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Email is required';
     }
+    final cleanEmail = value.trim().toLowerCase();
     final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-    if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email address';
+    if (!emailRegex.hasMatch(cleanEmail)) {
+      return 'Please enter a valid email address (e.g. abc@gmail.com)';
     }
     return null;
   }
@@ -16,6 +16,18 @@ class Validators {
     }
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
+    }
+    final hasUppercase = RegExp(r'[A-Z]').hasMatch(value);
+    if (!hasUppercase) {
+      return 'Password must contain at least one capital letter (A-Z)';
+    }
+    final hasLowercase = RegExp(r'[a-z]').hasMatch(value);
+    if (!hasLowercase) {
+      return 'Password must contain at least one small letter (a-z)';
+    }
+    final hasSpecialChar = RegExp(r'[!@#$%^&*(),.?":{}|<>\_\-\+\=\/\\]').hasMatch(value);
+    if (!hasSpecialChar) {
+      return 'Password must contain at least one special character (!@#$%^&*)';
     }
     return null;
   }
