@@ -83,10 +83,10 @@ class AuthRepositoryImpl implements AuthRepository {
     jsonMap.forEach((k, v) => passwords[k.toString().toLowerCase().trim()] = v.toString());
 
     // Default registered demo account passwords
-    passwords.putIfAbsent('admin@loanlens.gov.in', () => 'admin123');
-    passwords.putIfAbsent('manager.sbi@bank.co.in', () => 'manager123');
-    passwords.putIfAbsent('officer.solapur@loanlens.gov.in', () => 'officer123');
-    passwords.putIfAbsent('ramesh.farmer@gmail.com', () => 'farmer123');
+    passwords.putIfAbsent('admin@loanlens.gov.in', () => 'Admin@123');
+    passwords.putIfAbsent('manager.sbi@bank.co.in', () => 'Manager@123');
+    passwords.putIfAbsent('officer.solapur@loanlens.gov.in', () => 'Officer@123');
+    passwords.putIfAbsent('ramesh.farmer@gmail.com', () => 'Farmer@123');
 
     return passwords;
   }
