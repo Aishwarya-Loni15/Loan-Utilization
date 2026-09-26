@@ -12,6 +12,8 @@ import 'package:laon/features/auth/providers/auth_provider.dart';
 import 'package:laon/features/loans/providers/loan_provider.dart';
 import 'package:laon/features/notifications/providers/notification_provider.dart';
 
+import 'package:laon/core/services/ai_verification_engine.dart';
+
 final utilizationRepositoryProvider = Provider<UtilizationRepository>((ref) {
   return UtilizationRepositoryImpl();
 });
