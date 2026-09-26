@@ -278,9 +278,9 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
         final loanDisbursed = linkedLoan?.disbursedAmount ?? 200000.0;
         final remainingBal = linkedLoan?.remainingAmount ?? loanDisbursed;
 
-        final activeProofPath = _docFile?.path ?? _photoFile?.path ?? '';
-        final detectedReceiptAmt = activeProofPath.isNotEmpty
-            ? AiVerificationEngine().extractReceiptAmount(activeProofPath, 150000.0)
+        final activeReceiptPath = _docFile?.path ?? '';
+        final detectedReceiptAmt = activeReceiptPath.isNotEmpty
+            ? AiVerificationEngine().extractReceiptAmount(activeReceiptPath, 150000.0)
             : null;
 
         if (amount > remainingBal) {
@@ -298,7 +298,7 @@ class _CreateSubmissionPageState extends ConsumerState<CreateSubmissionPage> {
           return;
         }
 
-        if (detectedReceiptAmt != null && amount > detectedReceiptAmt) {
+        if (_docFile != null && detectedReceiptAmt != null && amount > detectedReceiptAmt) {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
