@@ -110,3 +110,50 @@ Payment Method: Bank Transfer / Direct Disbursement
         longitude < 72.0 ||
         longitude > 78.0) {
       locationScore = 30.0;
+      reasons.add(
+        'Location Alert: Captured GPS coordinate is outside beneficiary registered district boundary.',
+      );
+    } else {
+      reasons.add(
+        'GPS Geotag Verified: Coordinate (Lat $latitude, Long $longitude) is within registered farm boundary.',
+      );
+    }
+
+    reasons.add(
+      'Duplicate Fingerprint Check: 100% unique submission hash (No identical image/document in global repository).',
+    );
+
+    // Compute composite AI score
+    final double overallScore =
+        (purposeMatchScore * 0.35) +
+        (invoiceMatchScore * 0.25) +
+        (imageMatchScore * 0.20) +
+        (locationScore * 0.10) +
+        (duplicateScore * 0.10);
+
+    final riskLevel = RiskLevel.fromScore(overallScore);
+
+    return AiAnalysisModel(
+      analysisId: 'ai_ana_${DateTime.now().millisecondsSinceEpoch}',
+      submissionId: 'sub_pending',
+      aiScore: double.parse(overallScore.toStringAsFixed(1)),
+      riskLevel: riskLevel,
+      purposeMatchScore: purposeMatchScore,
+      invoiceMatchScore: invoiceMatchScore,
+      imageMatchScore: imageMatchScore,
+      locationScore: locationScore,
+      duplicateScore: duplicateScore,
+      extractedInvoiceAmount: extractedReceiptAmount,
+      detectedObjects: mockObjects,
+      detectedText: mockDetectedText,
+      reasons: reasons,
+      analyzedAt: DateTime.now(),
+      imageAuthenticityStatus: imageStatus,
+      geotagAuthenticityStatus: (locationScore < 50)
+          ? 'FAKE_OR_SPOOFED'
+          : 'REAL',
+      imageAuthenticityScore: isAiGen ? 10.0 : (hasFakeKeywords ? 25.0 : 92.0),
+      geotagAuthenticityScore: locationScore,
+    );
+  }
+}
