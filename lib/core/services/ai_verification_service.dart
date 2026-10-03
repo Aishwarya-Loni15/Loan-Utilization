@@ -130,3 +130,30 @@ Payment Method: Bank Transfer / Direct Disbursement
         (imageMatchScore * 0.20) +
         (locationScore * 0.10) +
         (duplicateScore * 0.10);
+
+    final riskLevel = RiskLevel.fromScore(overallScore);
+
+    return AiAnalysisModel(
+      analysisId: 'ai_ana_${DateTime.now().millisecondsSinceEpoch}',
+      submissionId: 'sub_pending',
+      aiScore: double.parse(overallScore.toStringAsFixed(1)),
+      riskLevel: riskLevel,
+      purposeMatchScore: purposeMatchScore,
+      invoiceMatchScore: invoiceMatchScore,
+      imageMatchScore: imageMatchScore,
+      locationScore: locationScore,
+      duplicateScore: duplicateScore,
+      extractedInvoiceAmount: extractedReceiptAmount,
+      detectedObjects: mockObjects,
+      detectedText: mockDetectedText,
+      reasons: reasons,
+      analyzedAt: DateTime.now(),
+      imageAuthenticityStatus: imageStatus,
+      geotagAuthenticityStatus: (locationScore < 50)
+          ? 'FAKE_OR_SPOOFED'
+          : 'REAL',
+      imageAuthenticityScore: isAiGen ? 10.0 : (hasFakeKeywords ? 25.0 : 92.0),
+      geotagAuthenticityScore: locationScore,
+    );
+  }
+}
